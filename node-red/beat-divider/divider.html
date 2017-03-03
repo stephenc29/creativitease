@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType('beat',{
+    RED.nodes.registerType('divider',{
         category: 'function',
         color: '#a6bbcf',
         defaults: {
@@ -9,18 +9,18 @@
         outputs:1,
         icon: "file.png",
         label: function() {
-            return this.name||"beat";
+            return this.name||"divider";
         }
     });
 </script>
 
-<script type="text/x-red" data-template-name="beat">
+<script type="text/x-red" data-template-name="divider">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="beat">
+<script type="text/x-red" data-help-name="divider">
     <p>It's meant to help generate music but for now it's a simple node that converts the message payloads into all lower-case characters</p>
 </script>
