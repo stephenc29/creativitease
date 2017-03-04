@@ -1,7 +1,5 @@
 module.exports = function(RED) {
     "use strict";
-//    var NanoTimer = require('nanotimer');
-//    var timer = new NanoTimer();
     var tick ;
     var context;
     
@@ -9,8 +7,15 @@ module.exports = function(RED) {
 	
         RED.nodes.createNode(this,config);
         var node = this;
+	
 	context = this.context();
-	context.set("interval", 600);
+
+	node.output = config.output;
+
+	setBPM(config.bpm);
+
+	var beatNum = 0;
+	
         this.on('input', function(msg) {
 	    switch(msg.payload){
 	    case "start":
@@ -22,29 +27,41 @@ module.exports = function(RED) {
 		break;
 
 	    case "interval":
-		var bpm = msg.bpm;
-		if(!isNaN(bpm)){
-		    if(bpm>10 && bpm <400){
-			context.set("interval", 60000.0/bpm);
-		    }
-		}
+		setBPM(msg.bpm);
 		break;
 	    }
         });
 
+	function setBPM(bpm){
+	    if(!isNaN(bpm)){
+		if(bpm>10 && bpm <1000){
+		    context.set("interval", 60000.0/bpm);
+		}
+		else{
+		    node.warn("BPM not in range 10-1000");
+		}
+	    }
+	    else{
+		node.warn("BPM is not a number: " + bpm);
+	    }
+	}
+
+	function getInterval(){
+	    return context.get("interval");
+	}
+	
 	function beat(){
-	    var beatNum = context.get("beatNum") || 0;
+	    beatNum = beatNum || 0;
 	    beatNum++;
-	    context.set("beatNum", beatNum);
-	    
+	    var output = context.get("output");
+	    var count = new Object();
+	    count[output] = beatNum;
 	    var msg = {payload: "tick",
-		       start: ["beat"],
-		       count:{"beat": beatNum}};
+		       start: [output],
+		       count: count};
 		       
 	    node.send(msg);
-
-	    var interval = context.get("interval");
-	    tick = setTimeout(beat, interval);
+	    tick = setTimeout(beat, getInterval());
 	}
 
     }

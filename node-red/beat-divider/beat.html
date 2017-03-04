@@ -1,17 +1,19 @@
 <script type="text/javascript">
-    RED.nodes.registerType('beat',{
-        category: 'function',
-        color: '#a6bbcf',
-        defaults: {
-            name: {value:""}
-        },
-        inputs:1,
-        outputs:1,
-        icon: "file.png",
-        label: function() {
-            return this.name||"beat";
-        }
-    });
+  RED.nodes.registerType('beat',{
+  category: 'creativitease',
+  color: '#a6bbcf',
+  defaults: {
+  name: {value:""},
+  output: {value:"beat"},
+  bpm: {value: 100}
+  },
+  inputs:1,
+  outputs:1,
+  icon: "file.png",
+  label: function() {
+  return this.name||"beat";
+  }
+  });
 </script>
 
 <script type="text/x-red" data-template-name="beat">
@@ -19,8 +21,16 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-row">
+        <label for="node-input-output"><i class="icon-tag"></i> Output name</label>
+        <input type="text" id="node-input-output" placeholder="Output (e.g. beat)">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bpm"><i class="icon-tag"></i> Beats per minute</label>
+        <input type="text" id="node-input-bpm" placeholder="BPM (e.g. 100)">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="beat">
-    <p>Generate a tick at a regular interval. Can be started or stopped ot have the bpm changed</p>
+    <p>Generate a tick at a regular interval. Can be started or stopped or have the bpm changed.</p>
 </script>
