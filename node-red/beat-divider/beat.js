@@ -53,11 +53,10 @@ module.exports = function(RED) {
 	function beat(){
 	    beatNum = beatNum || 0;
 	    beatNum++;
-	    var output = context.get("output");
 	    var count = new Object();
-	    count[output] = beatNum;
+	    count[node.output] = beatNum;
 	    var msg = {payload: "tick",
-		       start: [output],
+		       start: [node.output],
 		       count: count};
 		       
 	    node.send(msg);

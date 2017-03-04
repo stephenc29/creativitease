@@ -1,43 +1,38 @@
 module.exports = function(RED) {
     "use strict";
-    var context;
     
     function DividerNode(config) {
 	
         RED.nodes.createNode(this,config);
         var node = this;
-	context = this.context();
-	context.set("input", "beat");
-	context.set("output", "bar");
-	context.set("inputCount", 0);
-	context.set("outputCount", 0);
-	context.set("ratio", 4);
+	node.input = config.input || "beat";
+	node.output = config.output || "bar";
+	node.ratio = config.ratio || 4;
+	node.inputCount = 0;
+	node.outputCount = 0;
+	
         this.on('input', function(msg) {
 	    switch(msg.payload){
 	    case "tick":
-		var start = msg.start;
-		var input = context.get("input");
-		var output = context.get("output");
-		var index = start.indexOf(input);
-		if(start.indexOf(input)>=0){
-		    var inputCount = context.get("inputCount");
-		    var outputCount = context.get("outputCount");
-		    inputCount++;
-		    var ratio = context.get("ratio");
-		    if(inputCount > ratio || outputCount === 0){
-			inputCount = 1;
-			outputCount ++;
-			context.set("outputCount", outputCount);
-			start.push(output);
+		var start = msg.start || [];
+		if(start.indexOf(node.input)>=0){
+		    node.inputCount++;
+		    if(node.inputCount > node.ratio || node.outputCount === 0){
+			node.inputCount = 1;
+			node.outputCount ++;
+			start.push(node.output);
 		    }
-		    context.set("inputCount", inputCount);
-		    msg.start = start;
-		    msg.count[input + "_of_" + output] = inputCount;
-		    msg.count[output] = outputCount;
 		}
+		msg.start = start;
+		msg.count[node.input + "_of_" + node.output] = node.inputCount;
+		msg.count[node.output] = node.outputCount;
 		node.send(msg);
 		break;
 
+	    case "ratio":
+
+		break;
+		
 	    default:
 		node.send(msg);
 	    }
