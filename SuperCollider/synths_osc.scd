@@ -2,9 +2,10 @@
 (
 SynthDef("bell",
 {
-		arg out = 0, freq = 256, mod = 0.2, pan = 0, t_trig=0;
+		arg out = 0, midi = 60, mod = 0.2, pan = 0, t_trig=0;
 // Klank - bank of resonators excited by impulses
 		var p, z, panned, env;
+		var freq = midicps(midi);
 		var freqs = [ freq,
 			freq*1.81*Rand(1,1.01),
 			freq*2.73*Rand(1,1.01),
@@ -89,9 +90,10 @@ SynthDef("snare",
 
 (
 SynthDef("piano1",
-	{ arg out = 0, freq = 440, mod = 0.5, pan = 0, t_trig=0;
+	{ arg out = 0, midi = 60, mod = 0.5, pan = 0, t_trig=0;
 		var delayTime, detune, strike, hammerEnv, hammer;
 		var threeStrings, panned, silenced;
+		var freq = midicps(midi);
 //		strike = Impulse.ar(0, 0, mod);
 		strike = EnvGen.ar(Env.perc(0.0001,0.001, mod*0.05), t_trig);
 		hammerEnv = Decay2.ar(strike, 0.008, 0.04); // excitation envelope
@@ -99,7 +101,7 @@ SynthDef("piano1",
 			Mix.ar(Array.fill(3, { arg i;
 				// detune strings, calculate delay time :
 				detune = #[0.999, 1, 1.0005].at(i);
-				delayTime = 1 / (freq*detune);
+			delayTime = 1 / (freq*detune);
 				// each string gets own exciter :
 				hammer = LFNoise2.ar(3000, hammerEnv); // 3000 Hz was chosen by ear..
 				CombL.ar(hammer,		// used as a string resonator
@@ -113,17 +115,134 @@ SynthDef("piano1",
 ).add
 )
 
+// FROM github.com/brunoruviaro/SynthDefs-for-Patterns/
+
+(
+SynthDef("blips1", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, amp = 0.1, pan = 0.5, t_trig = 0;
+	var snd, env;
+	var freq = midicps(midi);
+	env = EnvGen.ar(Env.perc(att, rel, amp), t_trig, doneAction: 0);
+	snd = LeakDC.ar(Mix(Blip.ar([freq, freq*1.01], numharm, env)));
+	Out.ar(out, Pan2.ar(snd, pan));
+}).add;
+)
+
+(
+SynthDef("marimba1", {arg midi = 80, amp = 0.8, t_trig =0 ;
+	var snd, env, env2;
+	var freq = midicps(midi);
+	env = EnvGen.ar(Env.linen(0.015, 1, 0.5, amp), t_trig, doneAction: 0);
+	env2 = EnvGen.ar(Env.perc(0.015, 1, level:4), t_trig);
+	snd = BPF.ar(env2, freq, 0.02);
+	snd = BLowShelf.ar(snd, 220, 0.81, 6);
+	snd = snd * env;
+	Out.ar(0, Splay.ar(snd));
+}).add;
+)
+
+(
+SynthDef("prophet5pwmstrings", {
+	arg out = 0, pan = 0.0, freq = 440, amp = 1.0, gate = 0, att = 0.01, rel = 0, sus = 1, dec = 0.5, lforate = 10, lfowidth = 0.5, cutoff = 12000, rq = 0.5;
+
+	var lfo, pulse, filter, env;
+	lfo = LFTri.kr(lforate * [1, 1.01], Rand(0, 2.0) ! 2);
+	pulse = Pulse.ar(freq * [1, 1.01], lfo * lfowidth + 0.5);
+	filter = RLPF.ar(pulse, cutoff, rq);
+	env = EnvGen.ar(
+		envelope: Env.adsr(att, dec, sus, rel, amp),
+		gate: gate,
+		doneAction: 0);
+	Out.ar(out, Pan2.ar(
+		in: Mix(filter) * env * 0.5,
+		pos: pan)
+	);
+}).add
+)
+
+(
+SynthDef("moogbass", {
+	arg out = 0, pan = 0, midi = 40, amp = 0.1, gate = 0, cutoff = 1000, gain = 2.0, lagamount = 0.01, att = 0.001, dec = 0.3, sus = 0.9, rel = 0.2, chorus = 0.7;
+
+	var freq= midicps(midi);
+	var osc, filter, env, filterenv, snd, chorusfx;
+
+	osc = Mix(VarSaw.ar(
+		freq: freq.lag(lagamount) * [1.0, 1.001, 2.0],
+		iphase: Rand(0.0,1.0) ! 3,
+		width: Rand(0.5,0.75) ! 3,
+		mul: 0.5));
+
+	filterenv = EnvGen.ar(
+		envelope: Env.asr(0.2, 1, 0.2),
+		gate: gate);
+
+	filter =  MoogFF.ar(
+		in: osc,
+		freq: cutoff * (1.0 + (0.5 * filterenv)),
+		gain: gain);
+
+	env = EnvGen.ar(
+		envelope: Env.adsr(0.001, 0.3, 0.9, 0.2, amp),
+		gate: gate,
+		doneAction: 0);
+
+	snd = (0.7 * filter + (0.3 * filter.distort)) * env;
+
+	chorusfx = Mix.fill(7, {
+
+		var maxdelaytime = rrand(0.005, 0.02);
+		DelayC.ar(
+			in: snd,
+			maxdelaytime: maxdelaytime,
+			delaytime: LFNoise1.kr(
+				freq: Rand(4.5, 10.5),
+				mul: 0.25 * maxdelaytime,
+				add: 0.75 * maxdelaytime)
+		)
+	});
+
+	snd = snd + (chorusfx * chorus);
+
+	Out.ar(out, Pan2.ar(snd, pan));
+
+}).add;
+)
+
 a = Synth("bell")
 b = Synth("kick")
 c = Synth("snare")
 d = Synth("piano1")
+e = Synth("blips1")
+f = Synth("marimba1");
+g = Synth("prophet5pwmstrings")
+h = Synth("moogbass")
+
+
 
 
 
 a.set("t_trig",1)
+a.set("midi", 40)
+
 b.set("t_trig",1)
+b.set("freq", 500)
 c.set("t_trig",1)
+
+d.set("midi", 80)
 d.set("t_trig",1)
+
+e.set("midi", 30)
+e.set("t_trig",1)
+
+f.set("midi", 60)
+f.set("t_trig",1)
+
+g.set("gate",0)
+
+h.set("midi", 10)
+h.set("t_trig",1)
+
+
 
 (
 x = OSCFunc( { | msg, time, addr, port |
