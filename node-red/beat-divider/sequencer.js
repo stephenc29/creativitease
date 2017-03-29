@@ -1,16 +1,12 @@
 // allow restart on tick
 // enable/disable looping
 // start array includes note
-// send end note?
-// check out null note in sequence [1,2,,3]
-// replace sequencer?
 // fancy parsing of notes e.g. [1,1^,+3]*8 and note names
 // sequencing loudness
 // validity check in property editing
 // check that notes and rhythm are arrays of ints
-// allow notes or rhytm to be singleton number instead of singleton list
+// allow notes or rhythm to be singleton number instead of singleton list
 // default and non-default scale
-// configure octave (interact with synth e.g. for bass sounds?)
 
 module.exports = function(RED) {
     "use strict";
@@ -42,7 +38,8 @@ module.exports = function(RED) {
 	    node.rhythm = [1];
 	}
 
-	node.octave = 0; // make this configurable as an offset from middle C
+	node.octave = config.octave || 0;
+	
 	node.root = 60; // make this configurable as a name or offset, middle C for now
 	node.mode = "minor"; // make this configurable
 	
