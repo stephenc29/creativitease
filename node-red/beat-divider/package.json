@@ -12,7 +12,9 @@
   "node-red": {
       "nodes": {
 	  "beat": "beat.js",
-	  "divider": "divider.js"
+	  "divider": "divider.js",
+	  "sequencer": "sequencer.js",
+	  "notes": "notes.js"
       }
   },
     "author": "s.p.bradley@durham.ac.uk",
