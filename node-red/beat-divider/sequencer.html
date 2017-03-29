@@ -3,10 +3,11 @@
   category: 'creativitease',
   color: '#a6bbcf',
   defaults: {
-  name: {value: "bar"},
+  name: {value: "sequencer"},
   input: {value: "beat",
           required: true},
-  sequence: {value: "[1,1,2]", required: true}
+  notes: {value: "[1,4,5,4]", required: true},
+  rhythm: {value: "[3,1]", required: true}
   },
   inputs:1,
   outputs:1,
@@ -27,11 +28,15 @@
         <input type="text" id="node-input-input" placeholder="e.g. beat">
     </div>
     <div class="form-row">
-        <label for="node-input-sequence"><i class="icon-tag"></i> List of lengths</label>
-        <input type="text" id="node-input-sequence" placeholder="e.g. [1,1,2]">
+        <label for="node-input-notes"><i class="icon-tag"></i> List of notes</label>
+        <input type="text" id="node-input-notes" placeholder="e.g. [1,4,5,4]">
+    </div>
+    <div class="form-row">
+        <label for="node-input-rhythm"><i class="icon-tag"></i> List of lengths</label>
+        <input type="text" id="node-input-rhythm" placeholder="e.g. [3,1]">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="sequencer">
-    <p>Plays rhythms</p>
+    <p>Plays notes with a rhythm</p>
 </script>
