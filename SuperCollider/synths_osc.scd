@@ -1,8 +1,9 @@
+
 // bell
 (
 SynthDef("bell",
 {
-		arg out = 0, midi = 60, mod = 0.2, pan = 0, t_trig=0;
+		arg out = 0, midi = 40, mod = 0.2, pan = 0, t_trig=0;
 // Klank - bank of resonators excited by impulses
 		var p, z, panned, env;
 		var freq = midicps(midi);
@@ -25,7 +26,7 @@ SynthDef("bell",
 		//DetectSilence.ar(panned, doneAction:2);
 		Out.ar(out, panned);
 	}
-).store
+).add
 )
 
 (
@@ -161,8 +162,7 @@ SynthDef("prophet5pwmstrings", {
 
 (
 SynthDef("moogbass", {
-	arg out = 0, pan = 0, midi = 40, amp = 0.1, gate = 0, cutoff = 1000, gain = 2.0, lagamount = 0.01, att = 0.001, dec = 0.3, sus = 0.9, rel = 0.2, chorus = 0.7;
-
+	| out = 0, pan = 0, midi=60, amp = 0.7, gate = 0, cutoff = 1000, gain = 2.0, lagamount = 0.5, att = 0.001, dec = 0.3, sus = 0.9, rel = 0.2, chorus = 0.7 |
 	var freq= midicps(midi);
 	var osc, filter, env, filterenv, snd, chorusfx;
 
@@ -207,63 +207,48 @@ SynthDef("moogbass", {
 
 }).add;
 )
+// end of all synthdefs
 
-a = Synth("bell")
-b = Synth("kick")
-c = Synth("snare")
-d = Synth("piano1")
-e = Synth("blips1")
-f = Synth("marimba1");
-g = Synth("prophet5pwmstrings")
-h = Synth("moogbass")
+b = Synth("moogbass")
+b.set("gate",1)
+b.set("lagamount", 0.5)
+b.set("midi", 80)
 
-
-
-
-
-a.set("t_trig",1)
-a.set("midi", 40)
-
-b.set("t_trig",1)
-b.set("freq", 500)
-c.set("t_trig",1)
-
-d.set("midi", 80)
-d.set("t_trig",1)
-
-e.set("midi", 30)
-e.set("t_trig",1)
-
-f.set("midi", 60)
-f.set("t_trig",1)
-
-g.set("gate",0)
-
-h.set("midi", 10)
-h.set("t_trig",1)
-
-
+i=(); // instruments
 
 (
-x = OSCFunc( { | msg, time, addr, port |
-	a.set("t_trig", 1)
-}, '/bong' )
+i.bell = Synth("bell");
+i.kick = Synth("kick");
+i.snare = Synth("snare");
+i.piano = Synth("piano1");
+i.blips = Synth("blips1");
+i.marimba = Synth("marimba1");
+i.prophet = Synth("prophet5pwmstrings");
+//i.prophet.gate = 1;
+i.moogbass = Synth("moogbass");
 )
 
-(
-y = OSCFunc( { | msg, time, addr, port |
-	b.set("t_trig", 1)
-}, '/kick' )
-)
+i.moogbass.set("octave", -4)
+
+o = (); // OSC functions
 
 (
-z = OSCFunc( { | msg, time, addr, port |
-	c.set("t_trig", 1)
-}, '/snare' )
+i.keys.do( { |instrument|
+	var resource = '/' ++ instrument;
+	o[instrument] = ();
+	o[instrument].sound = OSCFunc( { | msg, time, addr, port |
+		var midi=msg[1];
+		if(midi== -1,
+			{
+				i[instrument].set("gate", 0);
+			}
+		,
+			{
+				i[instrument].set("midi" , midi);
+				i[instrument].set("t_trig", 1);
+				i[instrument].set("gate", 1);
+			}
+		)
+}, resource ) } )
 )
 
-(
-w = OSCFunc( { | msg, time, addr, port |
-	d.set("t_trig", 1)
-}, '/piano' )
-)
