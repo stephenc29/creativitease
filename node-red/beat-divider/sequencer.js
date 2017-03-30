@@ -1,17 +1,3 @@
-// integrate synthesiser: configure with instrument? Think about how this would work with switch block for drums. Maybe synth and a subflow.
-// allow volume control (and add a subflow with a volume slider)
-// fancy parsing of notes e.g. [1,1^,+3]*8 and note names
-// sequencing loudness
-// validity check in property editing
-// check that notes and rhythm are arrays of ints
-// allow notes or rhythm to be singleton number instead of singleton list
-// default and non-default scale
-// section sequencing from named list: separate node?
-// balance volumes of synths
-// route synths through effects
-// multiple sequencers working with the same synth: concurrent sounds
-// chords
-
 module.exports = function(RED) {
     "use strict";
 
@@ -81,18 +67,18 @@ module.exports = function(RED) {
 				return;
 			    }
 			}
-			msg.count["note_pos"] = node.notePos;
-			msg.note_midi = note2midi(node.notes[node.notePos], node);
-			// send previous note end?
-			start.push("note");
-			msg.start = start;
-			node.send(msg);
+			var playmsg = 
+			    {topic: "play",
+			     payload:
+			     {"midi": note2midi(node.notes[node.notePos], node)}}
+			;
+			node.send(playmsg);
 		    }
 		}
 		break;
 
 	    default:
-		node.send(msg);
+		// do nothing
 	    }
         });
 

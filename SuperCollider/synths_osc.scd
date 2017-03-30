@@ -212,7 +212,7 @@ SynthDef("moogbass", {
 b = Synth("moogbass")
 b.set("gate",1)
 b.set("lagamount", 0.5)
-b.set("midi", 80)
+b.set("midi", 48)
 
 i=(); // instruments
 
@@ -247,8 +247,15 @@ i.keys.do( { |instrument|
 				i[instrument].set("midi" , midi);
 				i[instrument].set("t_trig", 1);
 				i[instrument].set("gate", 1);
-			}
-		)
-}, resource ) } )
+			})
+}, resource );
+
+		o[instrument].volume = OSCFunc( { | msg, time, addr, port |
+		var amp=msg[1]/100;
+		i[instrument].set("amp" , amp);
+
+}, resource ++ '/volume' );
+	}
+)
 )
 
