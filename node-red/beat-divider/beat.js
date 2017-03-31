@@ -14,6 +14,8 @@ module.exports = function(RED) {
 
 	setBPM(config.bpm);
 
+	node.started = false;
+
 	var beatNum = 0;
 	
         this.on('input', function(msg) {
@@ -25,11 +27,15 @@ module.exports = function(RED) {
 	    default:
 		switch(msg.payload){
 		case "start":
-		    beat();
+		    if(!node.started){
+			beat();
+			node.started = true;
+		    }
 		    break;
 
 		case "stop":
 		    clearTimeout(tick);
+		    node.started = false;
 		    break;
 
 		default:
