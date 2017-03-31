@@ -17,18 +17,24 @@ module.exports = function(RED) {
 	var beatNum = 0;
 	
         this.on('input', function(msg) {
-	    switch(msg.payload){
-	    case "start":
-		beat();
+	    switch(msg.topic){
+	    case "bpm":
+		setBPM(msg.payload);
 		break;
 
-	    case "stop":
-		clearTimeout(tick);
-		break;
+	    default:
+		switch(msg.payload){
+		case "start":
+		    beat();
+		    break;
 
-	    case "interval":
-		setBPM(msg.bpm);
-		break;
+		case "stop":
+		    clearTimeout(tick);
+		    break;
+
+		default:
+		    node.send(msg);
+		}
 	    }
         });
 
@@ -55,9 +61,11 @@ module.exports = function(RED) {
 	    beatNum++;
 	    var count = new Object();
 	    count[node.output] = beatNum;
-	    var msg = {payload: "tick",
-		       start: [node.output],
-		       count: count};
+	    var msg = {topic: "tick",
+		       payload:{
+			   start: [node.output],
+			   count: count
+		       }};
 		       
 	    node.send(msg);
 	    tick = setTimeout(beat, getInterval());

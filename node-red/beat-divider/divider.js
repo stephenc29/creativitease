@@ -10,11 +10,13 @@ module.exports = function(RED) {
 	node.ratio = config.ratio || 4;
 	node.inputCount = 0;
 	node.outputCount = 0;
+	node.name = config.name;
 	
         this.on('input', function(msg) {
-	    switch(msg.payload){
+	    switch(msg.topic){
 	    case "tick":
-		var start = msg.start || [];
+		var start = msg.payload.start || [];
+
 		if(start.indexOf(node.input)>=0){
 		    node.inputCount++;
 		    if(node.inputCount > node.ratio || node.outputCount === 0){
@@ -23,10 +25,16 @@ module.exports = function(RED) {
 			start.push(node.output);
 		    }
 		}
-		msg.start = start;
-		msg.count[node.input + "_of_" + node.output] = node.inputCount;
-		msg.count[node.output] = node.outputCount;
+
+		msg.payload.start = start;
+
+		var counter = node.input + "_of_" + node.output;
+		msg.payload.count[counter] = node.inputCount;
+
+		msg.payload.count[node.output] = node.outputCount;
+
 		node.send(msg);
+
 		break;
 
 	    case "ratio":
