@@ -11,10 +11,14 @@ module.exports = function(RED) {
         this.on('input', function(msg) {
 	    switch(msg.topic){
 	    case "play":
+	    case "tick":
 		var playmsg = {
 		    "topic": "/" + node.name,
-		    "payload": msg.payload.midi
 		}
+		if(msg.payload && msg.payload.midi){
+		    playmsg.payload = msg.payload.midi;
+		}
+
 		node.send(playmsg);
 		break;
 
