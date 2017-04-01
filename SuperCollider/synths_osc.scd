@@ -215,7 +215,7 @@ SynthDef("moog", {
 		)
 	});
 
-	snd = (snd + (chorusfx * chorus)) * amp *0.5;
+	snd = (snd + (chorusfx * chorus)) * amp * 2.0;
 
 	Out.ar(out, Pan2.ar(snd, pan));
 
@@ -223,7 +223,7 @@ SynthDef("moog", {
 )
 
 a = Synth("moog")
-a.set("midi", 60)
+a.set("midi", 30)
 a.set("amp", 1.0)
 a.set("gate", 1)
 // end of all synthdefs
@@ -243,7 +243,7 @@ i.piano = Synth("piano");
 i.blips = Synth("blips");
 i.marimba = Synth("marimba");
 i.prophet = Synth("prophet");
-i.moogbass = Synth("moog");
+i.moog = Synth("moog");
 )
 
 i.moogbass.set("octave", -4)

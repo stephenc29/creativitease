@@ -19,26 +19,19 @@ module.exports = function(RED) {
 		break;
 
 	    case "volume":
-		if(msg.payload.startsWith("up")){
-		    var upby = Number(msg.payload.substring(2));
-		    if(Number.isNaN(upby)){
-			upby = 1;
-		    }
-		    node.vol += upby;
+		if(msg.payload =="up"){
+		    node.vol += 5;
 		}
-		else if(msg.payload.startsWith("down")){
-		    var downby = Number(msg.payload.substring(4));
-		    if(Number.isNaN(downby)){
-			downby = 1;
-		    }
-		    node.vol -= downby;
+		else if(msg.payload =="down"){
+		    node.vol -= 5;
 		}
-		else if(msg.payload.startWith("set")){
-		    var newVol = Number(msg.payload.substring(3));
+		else{
+		    var newVol = Number(msg.payload);
 		    if(!Number.isNaN(newVol)){
 			node.vol = newVol;
 		    }
-		}   
+		}
+		
 		node.vol = Math.min(100, Math.max(0, node.vol));
 		
 		var volmsg = {
