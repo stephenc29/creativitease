@@ -3,7 +3,7 @@
 (
 SynthDef("bell",
 {
-		arg out = 0, midi = 40, mod = 0.2, pan = 0, t_trig=0;
+		|out = 0, midi = 40, amp = 0.5, pan = 0, t_trig=0|
 // Klank - bank of resonators excited by impulses
 		var p, z, panned, env;
 		var freq = midicps(midi);
@@ -21,7 +21,7 @@ SynthDef("bell",
 			];
 		env = Env([0,1,0], [0.002,0.02]);
 		panned = Pan2.ar(
-			Klank.ar(z, BrownNoise.ar(mul: mod)*EnvGen.ar(env, t_trig, doneAction:0)), pan
+			Klank.ar(z, BrownNoise.ar(mul: amp*0.075)*EnvGen.ar(env, t_trig, doneAction:0)), pan
 		);
 		//DetectSilence.ar(panned, doneAction:2);
 		Out.ar(out, panned);
@@ -29,9 +29,11 @@ SynthDef("bell",
 ).add
 )
 
+
+
 (
-SynthDef("kick",
-	{ arg out = 0, freq = 50, mod_freq = 2, mod_index = 5, sustain = 0.3, amp = 0.8, beater_noise_level = 0.05, t_trig=0;
+SynthDef("kick",{
+	| out = 0, freq = 50, mod_freq = 2, mod_index = 5, sustain = 0.3, amp = 0.5, beater_noise_level = 0.05, t_trig=0 |
 	var pitch_contour, drum_osc, drum_lpf, drum_env;
 	var beater_source, beater_hpf, beater_lpf, lpf_cutoff_contour, beater_env;
 	var kick_mix;
@@ -51,14 +53,16 @@ SynthDef("kick",
 	kick_mix = Mix.new([drum_env, beater_env]) * 2 * amp;
 	Out.ar(out, [kick_mix, kick_mix])
 	}
-	).add
+).add
 )
+
+
 
 (
 SynthDef("snare",
 	{arg out = 0, sustain = 0.1, drum_mode_level = 0.25,
 	snare_level = 50, snare_tightness = 100,
-	freq = 805, amp = 0.8, t_trig=0;
+	freq = 805, amp = 0.5, t_trig=0;
 	var drum_mode_sin_1, drum_mode_sin_2, drum_mode_pmosc, drum_mode_mix, drum_mode_env;
 	var snare_noise, snare_brf_1, snare_brf_2, snare_brf_3, snare_brf_4, snare_reson;
 	var snare_env;
@@ -89,14 +93,17 @@ SynthDef("snare",
 ).add
 )
 
+
+
+
 (
-SynthDef("piano1",
-	{ arg out = 0, midi = 60, mod = 0.5, pan = 0, t_trig=0;
+SynthDef("piano",
+	{ |out = 0, midi = 60, amp = 0.5, pan = 0, t_trig=0; |
 		var delayTime, detune, strike, hammerEnv, hammer;
 		var threeStrings, panned, silenced;
 		var freq = midicps(midi);
 //		strike = Impulse.ar(0, 0, mod);
-		strike = EnvGen.ar(Env.perc(0.0001,0.001, mod*0.05), t_trig);
+		strike = EnvGen.ar(Env.perc(0.0001,0.001, amp*0.03), t_trig);
 		hammerEnv = Decay2.ar(strike, 0.008, 0.04); // excitation envelope
 		threeStrings = // array of 3 strings per note
 			Mix.ar(Array.fill(3, { arg i;
@@ -116,10 +123,12 @@ SynthDef("piano1",
 ).add
 )
 
+
+
 // FROM github.com/brunoruviaro/SynthDefs-for-Patterns/
 
 (
-SynthDef("blips1", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, amp = 0.1, pan = 0.5, t_trig = 0;
+SynthDef("blips", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, amp = 0.5, pan = 0.5, t_trig = 0;
 	var snd, env;
 	var freq = midicps(midi);
 	env = EnvGen.ar(Env.perc(att, rel, amp), t_trig, doneAction: 0);
@@ -128,11 +137,13 @@ SynthDef("blips1", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, a
 }).add;
 )
 
+
+
 (
-SynthDef("marimba1", {arg midi = 80, amp = 0.8, t_trig =0 ;
+SynthDef("marimba", {|midi = 80, amp = 0.5, t_trig =0|
 	var snd, env, env2;
 	var freq = midicps(midi);
-	env = EnvGen.ar(Env.linen(0.015, 1, 0.5, amp), t_trig, doneAction: 0);
+	env = EnvGen.ar(Env.linen(0.015, 1, 0.5, amp*300), t_trig);
 	env2 = EnvGen.ar(Env.perc(0.015, 1, level:4), t_trig);
 	snd = BPF.ar(env2, freq, 0.02);
 	snd = BLowShelf.ar(snd, 220, 0.81, 6);
@@ -142,27 +153,30 @@ SynthDef("marimba1", {arg midi = 80, amp = 0.8, t_trig =0 ;
 )
 
 (
-SynthDef("prophet5pwmstrings", {
-	arg out = 0, pan = 0.0, freq = 440, amp = 1.0, gate = 0, att = 0.01, rel = 0, sus = 1, dec = 0.5, lforate = 10, lfowidth = 0.5, cutoff = 12000, rq = 0.5;
+SynthDef("prophet", {
+	arg out = 0, pan = 0.0, freq = 440, amp = 0.5, gate = 0, att = 0.01, rel = 0, sus = 1, dec = 0.5, lforate = 10, lfowidth = 0.5, cutoff = 12000, rq = 0.5;
 
 	var lfo, pulse, filter, env;
 	lfo = LFTri.kr(lforate * [1, 1.01], Rand(0, 2.0) ! 2);
 	pulse = Pulse.ar(freq * [1, 1.01], lfo * lfowidth + 0.5);
 	filter = RLPF.ar(pulse, cutoff, rq);
 	env = EnvGen.ar(
-		envelope: Env.adsr(att, dec, sus, rel, amp),
+		envelope: Env.adsr(att, dec, sus, rel,1),
 		gate: gate,
 		doneAction: 0);
 	Out.ar(out, Pan2.ar(
-		in: Mix(filter) * env * 0.5,
+		in: Mix(filter) * env * 0.2 * amp,
 		pos: pan)
 	);
 }).add
 )
 
+
+
+
 (
-SynthDef("moogbass", {
-	| out = 0, pan = 0, midi=60, amp = 0.7, gate = 0, cutoff = 1000, gain = 2.0, lagamount = 0.5, att = 0.001, dec = 0.3, sus = 0.9, rel = 0.2, chorus = 0.7 |
+SynthDef("moog", {
+	| out = 0, pan = 0, midi=60, amp = 0.5, gate = 0, cutoff = 1000, gain = 2.0, lagamount = 0.5, att = 0.001, dec = 0.3, sus = 0.9, rel = 0.2, chorus = 0.7 |
 	var freq= midicps(midi);
 	var osc, filter, env, filterenv, snd, chorusfx;
 
@@ -182,7 +196,7 @@ SynthDef("moogbass", {
 		gain: gain);
 
 	env = EnvGen.ar(
-		envelope: Env.adsr(0.001, 0.3, 0.9, 0.2, amp),
+		envelope: Env.adsr(0.001, 0.3, 0.9, 0.2, 1),
 		gate: gate,
 		doneAction: 0);
 
@@ -201,12 +215,17 @@ SynthDef("moogbass", {
 		)
 	});
 
-	snd = snd + (chorusfx * chorus);
+	snd = (snd + (chorusfx * chorus)) * amp *0.5;
 
 	Out.ar(out, Pan2.ar(snd, pan));
 
 }).add;
 )
+
+a = Synth("moog")
+a.set("midi", 60)
+a.set("amp", 1.0)
+a.set("gate", 1)
 // end of all synthdefs
 
 b = Synth("moogbass")
@@ -217,15 +236,14 @@ b.set("midi", 48)
 i=(); // instruments
 
 (
-i.bell = Synth("bell");
-i.kick = Synth("kick");
-i.snare = Synth("snare");
-i.piano = Synth("piano1");
-i.blips = Synth("blips1");
-i.marimba = Synth("marimba1");
-i.prophet = Synth("prophet5pwmstrings");
-//i.prophet.gate = 1;
-i.moogbass = Synth("moogbass");
+i.bell = Synth("bell"); // untuned
+i.kick = Synth("kick"); //untuned
+i.snare = Synth("snare"); //untuned
+i.piano = Synth("piano");
+i.blips = Synth("blips");
+i.marimba = Synth("marimba");
+i.prophet = Synth("prophet");
+i.moogbass = Synth("moog");
 )
 
 i.moogbass.set("octave", -4)
