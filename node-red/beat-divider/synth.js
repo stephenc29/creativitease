@@ -23,17 +23,9 @@ module.exports = function(RED) {
 		break;
 
 	    case "volume":
-		if(msg.payload =="up"){
-		    node.vol += 5;
-		}
-		else if(msg.payload =="down"){
-		    node.vol -= 5;
-		}
-		else{
-		    var newVol = Number(msg.payload);
-		    if(!Number.isNaN(newVol)){
-			node.vol = newVol;
-		    }
+		var newVol = Number(msg.payload);
+		if(!Number.isNaN(newVol)){
+		    node.vol = newVol;
 		}
 		
 		node.vol = Math.min(100, Math.max(0, node.vol));

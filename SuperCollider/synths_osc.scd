@@ -26,7 +26,7 @@ SynthDef("bell",
 		//DetectSilence.ar(panned, doneAction:2);
 		Out.ar(out, panned);
 	}
-).add
+).store
 )
 
 
@@ -50,10 +50,10 @@ SynthDef("kick",{
 	lpf_cutoff_contour = Line.kr(6000, 500, 0.03);
 	beater_lpf = LPF.ar(in: beater_hpf, freq: lpf_cutoff_contour, mul: 1, add: 0);
 	beater_env = beater_lpf * EnvGen.ar(Env.perc, t_trig, doneAction: 0);
-	kick_mix = Mix.new([drum_env, beater_env]) * 2 * amp;
+	kick_mix = Mix.new([drum_env, beater_env]) * 8 * amp;
 	Out.ar(out, [kick_mix, kick_mix])
 	}
-).add
+).store
 )
 
 
@@ -87,10 +87,10 @@ SynthDef("snare",
 	snare_brf_3 = BRF.ar(in: snare_brf_2, freq: 3600, mul: 0.5, rq: 0.1);
 	snare_brf_4 = BRF.ar(in: snare_brf_3, freq: 2000, mul: snare_env, rq: 0.0001);
 	snare_reson = Resonz.ar(snare_brf_4, snare_tightness, mul: snare_level) ;
-	snare_drum_mix = Mix.new([drum_mode_mix, snare_reson]) * 5 * amp;
+	snare_drum_mix = Mix.new([drum_mode_mix, snare_reson]) * 10 * amp;
 	Out.ar(out, [snare_drum_mix, snare_drum_mix])
 	}
-).add
+).store
 )
 
 
@@ -98,7 +98,7 @@ SynthDef("snare",
 
 (
 SynthDef("piano",
-	{ |out = 0, midi = 60, amp = 0.5, pan = 0, t_trig=0; |
+	{ |out = 0, midi = 60, amp = 0.5, pan = 0, t_trig=0 |
 		var delayTime, detune, strike, hammerEnv, hammer;
 		var threeStrings, panned, silenced;
 		var freq = midicps(midi);
@@ -120,7 +120,7 @@ SynthDef("piano",
 		panned = Pan2.ar(threeStrings,pan);
 		Out.ar(out, panned)
 	}
-).add
+).store
 )
 
 
@@ -134,7 +134,7 @@ SynthDef("blips", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, am
 	env = EnvGen.ar(Env.perc(att, rel, amp), t_trig, doneAction: 0);
 	snd = LeakDC.ar(Mix(Blip.ar([freq, freq*1.01], numharm, env)));
 	Out.ar(out, Pan2.ar(snd, pan));
-}).add;
+}).store;
 )
 
 
@@ -149,14 +149,15 @@ SynthDef("marimba", {|midi = 80, amp = 0.5, t_trig =0|
 	snd = BLowShelf.ar(snd, 220, 0.81, 6);
 	snd = snd * env;
 	Out.ar(0, Splay.ar(snd));
-}).add;
+}).store;
 )
 
 (
 SynthDef("prophet", {
-	arg out = 0, pan = 0.0, freq = 440, amp = 0.5, gate = 0, att = 0.01, rel = 0, sus = 1, dec = 0.5, lforate = 10, lfowidth = 0.5, cutoff = 12000, rq = 0.5;
+	| out = 0, pan = 0.0, midi=60, amp = 0.5, gate = 0, att = 0.01, rel = 0, sus = 1, dec = 0.5, lforate = 10, lfowidth = 0.5, cutoff = 12000, rq = 0.5 |
 
 	var lfo, pulse, filter, env;
+	var freq = midicps(midi);
 	lfo = LFTri.kr(lforate * [1, 1.01], Rand(0, 2.0) ! 2);
 	pulse = Pulse.ar(freq * [1, 1.01], lfo * lfowidth + 0.5);
 	filter = RLPF.ar(pulse, cutoff, rq);
@@ -168,7 +169,7 @@ SynthDef("prophet", {
 		in: Mix(filter) * env * 0.2 * amp,
 		pos: pan)
 	);
-}).add
+}).store
 )
 
 
@@ -215,23 +216,13 @@ SynthDef("moog", {
 		)
 	});
 
-	snd = (snd + (chorusfx * chorus)) * amp * 2.0;
+	snd = (snd + (chorusfx * chorus)) * amp * 5.0;
 
 	Out.ar(out, Pan2.ar(snd, pan));
 
-}).add;
+}).store;
 )
 
-a = Synth("moog")
-a.set("midi", 30)
-a.set("amp", 1.0)
-a.set("gate", 1)
-// end of all synthdefs
-
-b = Synth("moogbass")
-b.set("gate",1)
-b.set("lagamount", 0.5)
-b.set("midi", 48)
 
 i=(); // instruments
 
@@ -245,8 +236,6 @@ i.marimba = Synth("marimba");
 i.prophet = Synth("prophet");
 i.moog = Synth("moog");
 )
-
-i.moogbass.set("octave", -4)
 
 o = (); // OSC functions
 

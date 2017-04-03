@@ -14,7 +14,8 @@
 	  "beat": "beat.js",
 	  "divider": "divider.js",
 	  "sequencer": "sequencer.js",
-	  "synth": "synth.js"
+	  "synth": "synth.js",
+	  "tracker": "tracker.js"
       }
   },
     "author": "s.p.bradley@durham.ac.uk",
