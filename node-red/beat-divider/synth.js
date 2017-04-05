@@ -15,8 +15,8 @@ module.exports = function(RED) {
 		var playmsg = {
 		    "topic": "/" + node.name,
 		}
-		if(msg.payload && msg.payload.midi){
-		    playmsg.payload = msg.payload.midi;
+		if(msg.midi){
+		    playmsg.payload = msg.midi;
 		}
 
 		node.send(playmsg);

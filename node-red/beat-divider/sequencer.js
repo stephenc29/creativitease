@@ -42,7 +42,7 @@ module.exports = function(RED) {
         this.on('input', function(msg) {
 	    switch(msg.topic){
 	    case "tick":
-		var start = msg.payload.start || [];
+		var start = msg.start || [];
 		if(start.indexOf(node.input)>=0){
 //		    only start/ restart when we get the right kind of tick
 		    if(node.rhythmPos == -1 &&start.indexOf(node.start)<0){
@@ -55,7 +55,7 @@ module.exports = function(RED) {
 			    node.rhythmPos = 0;
 			}
 			node.rhythmCount = node.rhythm[node.rhythmPos];
-			msg.payload.count["rhythm_pos"] = node.rhythmPos;
+			msg.rhythm_pos = node.rhythmPos;
 
 			node.notePos++;
 			if(node.notePos >= node.notes.length){
@@ -69,9 +69,7 @@ module.exports = function(RED) {
 			}
 			var playmsg = 
 			    {topic: "play",
-			     payload:
-			     {"midi": note2midi(node.notes[node.notePos], node)}}
-			;
+			     midi: note2midi(node.notes[node.notePos], node)};
 			node.send(playmsg);
 		    }
 		}

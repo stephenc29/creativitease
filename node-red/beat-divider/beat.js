@@ -14,9 +14,9 @@ module.exports = function(RED) {
 
 	setBPM(config.bpm);
 
-	node.started = false;
-
-	var beatNum = 0;
+	var beatNum, started;
+	reset(node);
+	
 	
         this.on('input', function(msg) {
 	    switch(msg.topic){
@@ -38,11 +38,22 @@ module.exports = function(RED) {
 		    node.started = false;
 		    break;
 
+		case "reset":
+		    clearTimeout(tick);
+		    reset();
+		    node.send(msg);
+		    break;
+
 		default:
 		    node.send(msg);
 		}
 	    }
         });
+
+	function reset(node){
+	    node.started = false;
+	    node.beatNum = 0;
+	}
 
 	function setBPM(bpm){
 	    if(!isNaN(bpm)){
@@ -68,11 +79,9 @@ module.exports = function(RED) {
 	    var count = new Object();
 	    count[node.output] = beatNum;
 	    var msg = {topic: "tick",
-		       payload:{
-			   start: [node.output],
-			   count: count
-		       }};
-		       
+		       start: [node.output],
+		       };
+	    msg[node.output] = beatNum;
 	    node.send(msg);
 	    tick = setTimeout(beat, getInterval());
 	}

@@ -15,7 +15,7 @@ module.exports = function(RED) {
         this.on('input', function(msg) {
 	    switch(msg.topic){
 	    case "tick":
-		var start = msg.payload.start || [];
+		var start = msg.start || [];
 
 		if(start.indexOf(node.input)>=0){
 		    node.inputCount++;
@@ -26,12 +26,12 @@ module.exports = function(RED) {
 		    }
 		}
 
-		msg.payload.start = start;
+		msg.start = start;
 
 		var counter = node.input + "_of_" + node.output;
-		msg.payload.count[counter] = node.inputCount;
+		msg[counter] = node.inputCount;
 
-		msg.payload.count[node.output] = node.outputCount;
+		msg[node.output] = node.outputCount;
 
 		node.send(msg);
 

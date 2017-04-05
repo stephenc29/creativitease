@@ -26,11 +26,14 @@
         <input type="text" id="node-input-output" placeholder="Output (e.g. beat)">
     </div>
     <div class="form-row">
-        <label for="node-input-bpm"><i class="icon-tag"></i> Beats per minute</label>
+        <label for="node-input-bpm"><i class="icon-tag"></i> Initial ticks per minute</label>
         <input type="text" id="node-input-bpm" placeholder="BPM (e.g. 100)">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="beat">
-    <p>Generate a tick at a regular interval. Can be started or stopped or have the bpm changed.</p>
+  <p>Generate a tick at a regular interval, like a metronome</p>
+  <p>The output message has the topic "tick"
+
+    Can be started or stopped or have the bpm changed.</p>
 </script>
