@@ -5,7 +5,7 @@
   defaults: {
   name: {value:""},
   output: {value:"beat"},
-  bpm: {value: 100}
+  bpm: {value: 200}
   },
   inputs:1,
   outputs:1,
@@ -22,18 +22,19 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-output"><i class="icon-tag"></i> Output name</label>
-        <input type="text" id="node-input-output" placeholder="Output (e.g. beat)">
+        <label for="node-input-output"><i class="icon-tag"></i> Output counter</label>
+        <input type="text" id="node-input-output" placeholder="e.g. beat)">
     </div>
     <div class="form-row">
-        <label for="node-input-bpm"><i class="icon-tag"></i> Initial ticks per minute</label>
-        <input type="text" id="node-input-bpm" placeholder="BPM (e.g. 100)">
+        <label for="node-input-bpm"><i class="icon-tag"></i> Initial beats per minute</label>
+        <input type="text" id="node-input-bpm" placeholder="BPM (e.g. 200)">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="beat">
-  <p>Generate a tick at a regular interval, like a metronome</p>
-  <p>The output message has the topic "tick"
+  <p>The beat generator ouputs ticks at a regular interval once it has started, like a metronome.</p>
+  <p>The output message has the topic "tick". The number of ticks is counted and included in the output message. By default the tick count is sent in <code>msg.beat</code> but this can be changed with the <b>Output counter</b> property.</p>
+  <p>Initially the number of beats per minute is set by the <b>BPM</b> property, with a default of 200. This can be altered by sending a message to the beat generator with <code>msg.topic</code> and the required beats-per-minute in <code>msg.payload</code></p>
+  <p>To start the beat generator, send it a message with <code>msg.payload</code> as <code>start</code>. A message with a payload of <code>stop</code> payload will stop (pause) the generator. If the generator is started again then the tick count will continue from where it left off. To start counting from 0 again, send a message with a payload of <code>reset</code>. Any reset messages will also be forwarded to the output of the node, as will any other input messages that do not have the topic <code>bpm</code> and do not have the payload <code>start</code> or <code>stop</code>.</p>
 
-    Can be started or stopped or have the bpm changed.</p>
 </script>
