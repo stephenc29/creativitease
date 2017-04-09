@@ -128,7 +128,7 @@ SynthDef("piano",
 // FROM github.com/brunoruviaro/SynthDefs-for-Patterns/
 
 (
-SynthDef("blips", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, amp = 0.5, pan = 0.5, t_trig = 0;
+SynthDef("blip", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, amp = 0.5, pan = 0.5, t_trig = 0;
 	var snd, env;
 	var freq = midicps(midi);
 	env = EnvGen.ar(Env.perc(att, rel, amp), t_trig, doneAction: 0);
@@ -231,7 +231,7 @@ i.bell = Synth("bell"); // untuned
 i.kick = Synth("kick"); //untuned
 i.snare = Synth("snare"); //untuned
 i.piano = Synth("piano");
-i.blips = Synth("blips");
+i.blip = Synth("blip");
 i.marimba = Synth("marimba");
 i.prophet = Synth("prophet");
 i.moog = Synth("moog");
