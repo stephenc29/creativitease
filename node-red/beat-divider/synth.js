@@ -5,8 +5,8 @@ module.exports = function(RED) {
 	
         RED.nodes.createNode(this,config);
         var node = this;
-	node.name = config.name || "piano";
-	node.vol = config.start_vol || 70;
+
+	reset();
 	
         this.on('input', function(msg) {
 	    switch(msg.topic){
@@ -39,9 +39,28 @@ module.exports = function(RED) {
 		break;
 		
 	    default:
-		// do nothing
+		switch(msg.payload){
+		case "reset":
+		    reset();
+		    // just this once the reset message is not propagated
+		    break;
+
+		default:
+		    // do nothing
+		}
+		
 	    }
         });
+
+	function reset(){
+	    node.name = config.name || "piano";
+	    node.vol = Number(config.start_vol) || 70;
+	    var volmsg = {
+		"topic": "/" + node.name + "/volume",
+		"payload": node.vol
+	    }
+	    node.send(volmsg);
+	}
     }
     
 	

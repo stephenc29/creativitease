@@ -1,21 +1,12 @@
 module.exports = function(RED) {
     "use strict";
-    var tick ;
-    var context;
     
     function BeatNode(config) {
 	
         RED.nodes.createNode(this,config);
         var node = this;
 	
-	context = this.context();
-
-	node.output = config.output;
-
-	setBPM(config.bpm);
-
-	var beatNum, started;
-	reset(node);
+	reset();
 	
 	
         this.on('input', function(msg) {
@@ -34,12 +25,12 @@ module.exports = function(RED) {
 		    break;
 
 		case "stop":
-		    clearTimeout(tick);
+		    clearTimeout(node.tick);
 		    node.started = false;
 		    break;
 
 		case "reset":
-		    clearTimeout(tick);
+		    clearTimeout(node.tick);
 		    reset();
 		    node.send(msg);
 		    break;
@@ -50,7 +41,9 @@ module.exports = function(RED) {
 	    }
         });
 
-	function reset(node){
+	function reset(){
+	    node.output = config.output;
+	    setBPM(config.bpm);
 	    node.started = false;
 	    node.beatNum = 0;
 	}
@@ -58,7 +51,7 @@ module.exports = function(RED) {
 	function setBPM(bpm){
 	    if(!isNaN(bpm)){
 		if(bpm>10 && bpm <1000){
-		    context.set("interval", 60000.0/bpm);
+		    node.interval = 60000.0/bpm;
 		}
 		else{
 		    node.warn("BPM not in range 10-1000");
@@ -68,22 +61,18 @@ module.exports = function(RED) {
 		node.warn("BPM is not a number: " + bpm);
 	    }
 	}
-
-	function getInterval(){
-	    return context.get("interval");
-	}
 	
 	function beat(){
-	    beatNum = beatNum || 0;
-	    beatNum++;
+	    node.beatNum = node.beatNum || 0;
+	    node.beatNum++;
 	    var count = new Object();
-	    count[node.output] = beatNum;
+	    count[node.output] = node.beatNum;
 	    var msg = {topic: "tick",
 		       start: [node.output],
 		       };
-	    msg[node.output] = beatNum;
+	    msg[node.output] = node.beatNum;
 	    node.send(msg);
-	    tick = setTimeout(beat, getInterval());
+	    node.tick = setTimeout(beat, node.interval);
 	}
 
     }

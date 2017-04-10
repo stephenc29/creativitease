@@ -5,12 +5,8 @@ module.exports = function(RED) {
 	
         RED.nodes.createNode(this,config);
         var node = this;
-	node.input = config.input || "beat";
-	node.output = config.output || "bar";
-	node.ratio = config.ratio || 4;
-	node.inputCount = 0;
-	node.outputCount = 0;
-	node.name = config.name;
+
+	reset();
 	
         this.on('input', function(msg) {
 	    switch(msg.topic){
@@ -42,14 +38,31 @@ module.exports = function(RED) {
 		break;
 		
 	    default:
-		node.send(msg);
+		switch(msg.payload){
+		case "reset":
+		    reset();
+		    node.send(msg);
+		    break;
+
+		default:
+		    node.send(msg);
+		    break;
+		}
 	    }
         });
 
+	function reset(){
+	    node.input = config.input || "beat";
+	    node.output = config.output || "bar";
+	    node.ratio = config.ratio || 4;
+	    node.inputCount = 0;
+	    node.outputCount = 0;
+	    node.name = config.name;
+	}
 
     }
     
-	
+    
     RED.nodes.registerType("divider",DividerNode);
 }
 

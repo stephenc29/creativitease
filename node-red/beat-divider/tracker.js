@@ -5,16 +5,9 @@ module.exports = function(RED) {
 	
         RED.nodes.createNode(this,config);
         var node = this;
-	node.track = config.track || "volume";
-	node.name = config.name || " tracker";
-	node.min = Number(config.min) || 0;
-	node.max = Number(config.max) || 100;
-	node.initial = Number(config.initial) || 50;
-	node.step = Number(config.step) || 5;
-	node.multiply = Boolean(config.multiply) || false;
 
-	setTracker(node, node.initial);
-
+	reset();
+	
 	var newVal;
 	
         this.on('input', function(msg) {
@@ -42,28 +35,54 @@ module.exports = function(RED) {
 		else{
 		    newVal = oldVal + change;
 		}
-		setTracker(node, newVal);
+		setTracker(newVal);
 		break;
 
-	    case "reset":
-		setTracker(node, node.initial);
-		break;
-
-	    case null:
-	    case undefined:
-	    case "":
 	    case "set":
-		newVal = Number(msg.payload);
-		if(!Number.isNaN(newVal)){
-		    setTracker(node, newVal);
+	    default:
+		if(msg.payload == "reset"){
+		    reset();
+		    node.send(msg);
+		}
+		else{
+		    newVal = Number(msg.payload);
+		    if(!Number.isNaN(newVal)){
+			setTracker(newVal);
+		    }
 		}
 		   // else nothing
 		break;
-		
-	    default:
-		// do nothing
 	    }
         });
+
+	function setTracker(newVal){
+	    node.trackedVal = Math.min(node.max, Math.max(node.min, newVal));
+	    var disp;
+	    if(node.trackedVal>=10){
+		disp = Math.round(node.trackedVal);
+	    }
+	    else{
+		disp = Math.round(node.trackedVal*10)/10;
+	    }
+	    node.status({fill: "grey", shape: "ring", text: node.track + ": " + disp});
+	    
+	    node.send({
+		topic: node.track,
+		payload: node.trackedVal
+	    });
+	}
+
+	function reset(){
+	    node.track = config.track || "volume";
+	    node.name = config.name || " tracker";
+	    node.min = Number(config.min) || 0;
+	    node.max = Number(config.max) || 100;
+	    node.initial = Number(config.initial) || 50;
+	    node.step = Number(config.step) || 5;
+	    node.multiply = Boolean(config.multiply) || false;
+	    
+	    setTracker(node.initial);
+	}
     }
     
     function numberFrom(val, undef){
@@ -75,22 +94,6 @@ module.exports = function(RED) {
     }
     
 	
-    function setTracker(node, newVal){
-	node.trackedVal = Math.min(node.max, Math.max(node.min, newVal));
-	var disp;
-	if(node.trackedVal>=10){
-	    disp = Math.round(node.trackedVal);
-	}
-	else{
-	    disp = Math.round(node.trackedVal*10)/10;
-	}
-	node.status({fill: "grey", shape: "ring", text: node.track + ": " + disp});
-
-	node.send({
-	    topic: node.track,
-	    payload: node.trackedVal
-	});
-    }
 
     RED.nodes.registerType("tracker",TrackerNode);
 }

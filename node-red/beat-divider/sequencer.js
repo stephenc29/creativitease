@@ -4,38 +4,6 @@ module.exports = function(RED) {
     function SequencerNode(config) {
         RED.nodes.createNode(this,config);
         var node = this;
-	node.input = config.input || "beat";
-
-	try{
-	    node.notes = JSON.parse(config.notes);
-	}
-	catch(e){
-	    node.notes = null;
-	}
-	if(!Array.isArray(node.notes)){
-	    node.warn("Invalid or undefined notes, using [1]");
-	    node.notes = [1];
-	}
-
-	try{
-	    node.rhythm = JSON.parse(config.rhythm);
-	}
-	catch(e){
-	    node.rhythm = null;
-	}
-	if(!Array.isArray(node.rhythm)){
-	    node.warn("Invalid or undefined note lengths for using [1]");
-	    node.rhythm = [1];
-	}
-
-	node.octave = config.octave || 0;
-
-	node.start = config.start || "bar"; // sequence won't start until this
-
-	node.loop = config.loop || false;
-	
-	node.root = 60; // make this configurable as a name or offset, middle C for now
-	node.mode = "minor"; // make this configurable
 
 	reset();
 	
@@ -63,7 +31,7 @@ module.exports = function(RED) {
 				node.notePos = 0;
 			    }
 			    else{
-				reset();
+				restart();
 				return;
 			    }
 			}
@@ -76,14 +44,60 @@ module.exports = function(RED) {
 		break;
 
 	    default:
-		node.send(msg);
+		switch(msg.payload){
+		case "reset":
+		    reset();
+		    node.send(msg);
+		    break;
+
+		default:
+		    node.send(msg);
+		    break;
+		}
 	    }
         });
 
-	function reset(){
+	function restart(){
 	    node.rhythmPos = -1; // the position in the list of lengths
 	    node.rhythmCount = 0; // count down the number of beats
 	    node.notePos = -1; // the position in the list of notes
+	}
+	
+	function reset(){
+	    node.input = config.input || "beat";
+	    
+	    try{
+		node.notes = JSON.parse(config.notes);
+	    }
+	    catch(e){
+		node.notes = null;
+	    }
+	    if(!Array.isArray(node.notes)){
+		node.warn("Invalid or undefined notes, using [1]");
+		node.notes = [1];
+	    }
+	    
+	    try{
+		node.rhythm = JSON.parse(config.rhythm);
+	    }
+	    catch(e){
+		node.rhythm = null;
+	    }
+	    if(!Array.isArray(node.rhythm)){
+		node.warn("Invalid or undefined note lengths for using [1]");
+		node.rhythm = [1];
+	    }
+	    
+	    node.octave = config.octave || 0;
+	    
+	    node.start = config.start || "bar"; // sequence won't start until this
+	    
+	    node.loop = config.loop || false;
+	    
+	    node.root = 60; // make this configurable as a name or offset, middle C for now
+	    node.mode = "minor"; // make this configurable
+
+	    restart();
 	}
 
 
