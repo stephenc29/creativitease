@@ -7,7 +7,9 @@
   input: {value: "beat",
           required: true},
   notes: {value: "[1,4,5,4]", required: true},
+  notesrand: {value: false, required: false},
   rhythm: {value: "[3,1]", required: true},
+  rhythmrand: {value: false, required: false},
   octave: {value: 0},
   loop: {value: true, required: true},
   start: {value: "bar", required: true}
@@ -43,8 +45,16 @@
         <input type="text" id="node-input-notes" placeholder="e.g. [1,4,5,4]">
     </div>
     <div class="form-row">
+        <label for="node-input-notesrand"><i class="icon-tag"></i> Choose notes randomly from list</label>
+        <input type="checkbox" id="node-input-notesrand">
+    </div>
+    <div class="form-row">
         <label for="node-input-rhythm"><i class="icon-tag"></i> List of lengths</label>
         <input type="text" id="node-input-rhythm" placeholder="e.g. [3,1]">
+    </div>
+    <div class="form-row">
+        <label for="node-input-rhythmrand"><i class="icon-tag"></i> Choose lengths randomly from list</label>
+        <input type="checkbox" id="node-input-rhythmrand">
     </div>
     <div class="form-row">
         <label for="node-input-octave"><i class="icon-tag"></i> Octave</label>

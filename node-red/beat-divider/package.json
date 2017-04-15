@@ -10,16 +10,17 @@
     "node-red"
   ],
   "node-red": {
-      "nodes": {
-	  "beat": "beat.js",
-	  "divider": "divider.js",
-	  "sequencer": "sequencer.js",
-	  "synth": "synth.js",
-	  "tracker": "tracker.js"
-      }
-  },
-    "author": "s.p.bradley@durham.ac.uk",
-    "license": "ISC",
-    "dependencies": {
+    "nodes": {
+      "beat": "beat.js",
+      "divider": "divider.js",
+      "sequencer": "sequencer.js",
+      "synth": "synth.js",
+      "tracker": "tracker.js"
     }
+  },
+  "author": "s.p.bradley@durham.ac.uk",
+  "license": "ISC",
+  "dependencies": {
+    "underscore": "^1.8.3"
+  }
 }
