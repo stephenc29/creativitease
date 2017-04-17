@@ -58,6 +58,10 @@ module.exports = function(RED) {
 	    }
         });
 
+	this.on('close', function(){
+	    free();
+	});
+
 	function setSynthVol(){
 	    var amp = node.vol/100.0; // Use a logarithmic scale?
 	    
@@ -77,18 +81,23 @@ module.exports = function(RED) {
 	    global.set("synth_next_sc_node", id + 1);
 	    return id;
 	}
-	
-	function reset(){
-	    node.name = config.name || "piano";
-	    node.vol = Number(config.start_vol) || 70;
 
+	function free(){
 	    if(node.synth_id){
 		var freeMsg = {
 		    topic: "/n_free",
 		    payload: node.synth_id
 		}
+		node.send(freeMsg);
+		node.synth_id = null;
 	    }
-	    node.send(freeMsg);
+	}
+	
+	function reset(){
+	    node.name = config.name || "piano";
+	    node.vol = Number(config.start_vol) || 70;
+
+	    free();
 	    
 	    // get Supercollider nodeID from global context
 	    node.synth_id = getNextSCNode();
