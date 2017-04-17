@@ -223,46 +223,27 @@ SynthDef("moog", {
 }).store;
 )
 
-
-i=(); // instruments
-
+// Crotale adapted from SuperCollider book p24
 (
-i.bell = Synth("bell"); // untuned
-i.kick = Synth("kick"); //untuned
-i.snare = Synth("snare"); //untuned
-i.piano = Synth("piano");
-i.blip = Synth("blip");
-i.marimba = Synth("marimba");
-i.prophet = Synth("prophet");
-i.moog = Synth("moog");
-)
+//run this first
+SynthDef("crotale", {
+| midi = 60, tone = 3, art = 1, amp = 0.5, pan = 0, t_trig = 0 |
+var env, out, mod, freq;
 
-o = (); // OSC functions
+freq = midi.midicps;
+env = Env.perc(0, art);
+mod = 5 + (1/IRand(2, 6));
 
-(
-i.keys.do( { |instrument|
-	var resource = '/' ++ instrument;
-	o[instrument] = ();
-	o[instrument].sound = OSCFunc( { | msg, time, addr, port |
-		var midi=msg[1];
-		if(midi== -1,
-			{
-				i[instrument].set("gate", 0);
-			}
-		,
-			{
-				i[instrument].set("midi" , midi);
-				i[instrument].set("t_trig", 1);
-				i[instrument].set("gate", 1);
-			})
-}, resource );
+out = PMOsc.ar(freq, mod*freq,
+	pmindex: EnvGen.kr(env, t_trig, timeScale: art, levelScale: tone),
+	mul: EnvGen.kr(env,  t_trig, timeScale: art, levelScale: 0.3));
 
-		o[instrument].volume = OSCFunc( { | msg, time, addr, port |
-		var amp=msg[1]/100;
-		i[instrument].set("amp" , amp);
+out = Pan2.ar(out, pan);
 
-}, resource ++ '/volume' );
-	}
-)
+out = out * EnvGen.kr(env, t_trig, timeScale: 1.3*art,
+	levelScale: Rand(0.1, 0.5));
+Out.ar(0, out); //Out.ar(bus, out);
+
+}).store;
 )
 
