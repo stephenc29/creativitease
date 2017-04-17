@@ -51,6 +51,20 @@ module.exports = function(RED) {
 		    // just this once the reset message is not propagated
 		    break;
 
+		case "stop":
+		    var stopMsg = {topic: "/n_set",
+				   payload:
+				   [node.synth_id, "gate" , 0]
+				  }
+		    node.send(stopMsg);
+		    break;
+		    
+		case "start":
+		    // restart the synth
+		    freeSynth();
+		    createSynth();
+		    break;
+		    
 		default:
 		    // do nothing
 		}
@@ -59,7 +73,7 @@ module.exports = function(RED) {
         });
 
 	this.on('close', function(){
-	    free();
+	    freeSynth();
 	});
 
 	function setSynthVol(){
@@ -72,17 +86,24 @@ module.exports = function(RED) {
 	    node.send(volmsg);
 	}
 	
-	function getNextSCNode(){
+
+	function createSynth(){
 	    var global = node.context().global;
 	    var id = Number(global.get("synth_next_sc_node"));
 	    if(isNaN(id)){
 		id = 100000; // high to avoid nodes from sclang
 	    }
 	    global.set("synth_next_sc_node", id + 1);
-	    return id;
+	    node.synth_id = id;
+	    var createMsg = {
+		topic: "/s_new",
+		payload: [node.name, node.synth_id, 1, 1]
+	    }
+	    node.send(createMsg);
+	    setSynthVol();
 	}
-
-	function free(){
+	
+	function freeSynth(){
 	    if(node.synth_id){
 		var freeMsg = {
 		    topic: "/n_free",
@@ -97,18 +118,8 @@ module.exports = function(RED) {
 	    node.name = config.name || "piano";
 	    node.vol = Number(config.start_vol) || 70;
 
-	    free();
-	    
-	    // get Supercollider nodeID from global context
-	    node.synth_id = getNextSCNode();
-
-	    var createMsg = {
-		topic: "/s_new",
-		payload: [node.name, node.synth_id, 1, 1]
-	    }
-	    node.send(createMsg);
-
-	    setSynthVol();
+	    freeSynth();
+	    createSynth();
 	}
     }
     

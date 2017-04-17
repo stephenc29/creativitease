@@ -22,11 +22,13 @@ module.exports = function(RED) {
 			beat();
 			node.started = true;
 		    }
+		    node.send(msg);
 		    break;
 
 		case "stop":
 		    clearTimeout(node.tick);
 		    node.started = false;
+		    node.send(msg);
 		    break;
 
 		case "reset":
