@@ -30,7 +30,6 @@ module.exports = function(RED) {
 		    break;
 
 		case "reset":
-		    clearTimeout(node.tick);
 		    reset();
 		    node.send(msg);
 		    break;
@@ -41,7 +40,12 @@ module.exports = function(RED) {
 	    }
         });
 
+	this.on('close', function(){
+	    clearTimeout(node.tick);
+	});
+		
 	function reset(){
+	    clearTimeout(node.tick);
 	    node.output = config.output;
 	    setBPM(config.bpm);
 	    node.started = false;
