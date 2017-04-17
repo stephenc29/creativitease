@@ -12,11 +12,21 @@ module.exports = function(RED) {
 	    switch(msg.topic){
 	    case "play":
 	    case "tick":
-		var playmsg = {
-		    "topic": "/" + node.name,
+		var payload = [node.synth_id];
+		if(msg.midi == -1){
+		    payload.push("gate", 0);
 		}
-		if(msg.midi){
-		    playmsg.payload = msg.midi;
+		else{
+		    payload.push("gate", 1);
+		    payload.push("t_trig", 1);
+		    if(msg.midi){
+			payload.push("midi", msg.midi);
+		    }
+		}
+		
+		var playmsg = {
+		    topic: "/n_set",
+		    payload: payload
 		}
 
 		node.send(playmsg);
@@ -29,13 +39,9 @@ module.exports = function(RED) {
 		}
 		
 		node.vol = Math.min(100, Math.max(0, node.vol));
-		
-		var volmsg = {
-		    "topic": "/" + node.name + "/volume",
-		    "payload": node.vol
-		}
-		node.send(volmsg);
-		
+
+		setSynthVol();
+
 		break;
 		
 	    default:
@@ -52,14 +58,48 @@ module.exports = function(RED) {
 	    }
         });
 
+	function setSynthVol(){
+	    var amp = node.vol/100.0; // Use a logarithmic scale?
+	    
+	    var volmsg = {
+		"topic": "/n_set",
+		"payload": [node.synth_id, "amp", amp]
+	    }
+	    node.send(volmsg);
+	}
+	
+	function getNextSCNode(){
+	    var global = node.context().global;
+	    var id = Number(global.get("synth_next_sc_node"));
+	    if(isNaN(id)){
+		id = 100000; // high to avoid nodes from sclang
+	    }
+	    global.set("synth_next_sc_node", id + 1);
+	    return id;
+	}
+	
 	function reset(){
 	    node.name = config.name || "piano";
 	    node.vol = Number(config.start_vol) || 70;
-	    var volmsg = {
-		"topic": "/" + node.name + "/volume",
-		"payload": node.vol
+
+	    if(node.synth_id){
+		var freeMsg = {
+		    topic: "/n_free",
+		    payload: node.synth_id
+		}
 	    }
-	    node.send(volmsg);
+	    node.send(freeMsg);
+	    
+	    // get Supercollider nodeID from global context
+	    node.synth_id = getNextSCNode();
+
+	    var createMsg = {
+		topic: "/s_new",
+		payload: [node.name, node.synth_id, 1, 1]
+	    }
+	    node.send(createMsg);
+
+	    setSynthVol();
 	}
     }
     
