@@ -33,7 +33,7 @@
 
 <script type="text/x-red" data-help-name="beat">
   <p>The beat generator ouputs ticks at a regular interval once it has started, like a metronome.</p>
-  <p>The output message has the topic "tick". The number of ticks is counted and included in the output message. By default the tick count is sent in <code>msg.beat</code> but this can be changed with the <b>Output counter</b> property.</p>
+  <p>The output message has the payload "tick". The number of ticks is counted and included in the output message. By default the tick count is sent in <code>msg.beat</code> but this can be changed with the <b>Output counter</b> property.</p>
   <p>Initially the number of beats per minute is set by the <b>BPM</b> property, with a default of 200. This can be altered by sending a message to the beat generator with <code>msg.topic</code> and the required beats-per-minute in <code>msg.payload</code></p>
   <p>To start the beat generator, send it a message with <code>msg.payload</code> as <code>start</code>.</p>
   <p>A message with a payload of <code>stop</code> payload will stop (pause) the generator. If the generator is started again then the tick count will continue from where it left off.</p>

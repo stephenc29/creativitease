@@ -73,7 +73,7 @@ module.exports = function(RED) {
 	    node.beatNum++;
 	    var count = new Object();
 	    count[node.output] = node.beatNum;
-	    var msg = {topic: "tick",
+	    var msg = {payload: "tick",
 		       start: [node.output],
 		       };
 	    msg[node.output] = node.beatNum;

@@ -10,28 +10,6 @@ module.exports = function(RED) {
 	
         this.on('input', function(msg) {
 	    switch(msg.topic){
-	    case "play":
-	    case "tick":
-		var payload = [node.synth_id];
-		if(msg.midi == -1){
-		    payload.push("gate", 0);
-		}
-		else{
-		    payload.push("gate", 1);
-		    payload.push("t_trig", 1);
-		    if(msg.midi){
-			payload.push("midi", msg.midi);
-		    }
-		}
-		
-		var playmsg = {
-		    topic: "/n_set",
-		    payload: payload
-		}
-
-		node.send(playmsg);
-		break;
-
 	    case "volume":
 		var newVol = Number(msg.payload);
 		if(!Number.isNaN(newVol)){
@@ -46,6 +24,29 @@ module.exports = function(RED) {
 		
 	    default:
 		switch(msg.payload){
+
+		case "play":
+		case "tick":
+		    var payload = [node.synth_id];
+		    if(msg.midi == -1){
+			payload.push("gate", 0);
+		    }
+		    else{
+		    payload.push("gate", 1);
+			payload.push("t_trig", 1);
+			if(msg.midi){
+			    payload.push("midi", msg.midi);
+			}
+		    }
+		    
+		    var playmsg = {
+			topic: "/n_set",
+			payload: payload
+		    }
+		    
+		    node.send(playmsg);
+		    break;
+		    
 		case "reset":
 		    reset();
 		    // just this once the reset message is not propagated

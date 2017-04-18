@@ -10,7 +10,7 @@ module.exports = function(RED) {
 	reset();
 	
         this.on('input', function(msg) {
-	    switch(msg.topic){
+	    switch(msg.payload){
 	    case "tick":
 		var start = msg.start || [];
 		if(start.indexOf(node.input)>=0){
@@ -51,24 +51,21 @@ module.exports = function(RED) {
 			    note = node.notes[node.notePos]
 			}
 			var playmsg = 
-			    {topic: "play",
+			    {payload: "play",
 			     midi: note2midi(note)};
 			node.send(playmsg);
 		    }
 		}
 		break;
 
+	    case "reset":
+		reset();
+		node.send(msg);
+		break;
+		
 	    default:
-		switch(msg.payload){
-		case "reset":
-		    reset();
-		    node.send(msg);
-		    break;
-
-		default:
-		    node.send(msg);
-		    break;
-		}
+		node.send(msg);
+		break;
 	    }
         });
 

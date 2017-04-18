@@ -9,7 +9,7 @@ module.exports = function(RED) {
 	reset();
 	
         this.on('input', function(msg) {
-	    switch(msg.topic){
+	    switch(msg.payload){
 	    case "tick":
 		var start = msg.start || [];
 
@@ -33,21 +33,14 @@ module.exports = function(RED) {
 
 		break;
 
-	    case "ratio":
-
+	    case "reset":
+		reset();
+		node.send(msg);
 		break;
 		
 	    default:
-		switch(msg.payload){
-		case "reset":
-		    reset();
-		    node.send(msg);
-		    break;
-
-		default:
-		    node.send(msg);
-		    break;
-		}
+		node.send(msg);
+		break;
 	    }
         });
 
