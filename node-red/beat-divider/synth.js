@@ -27,7 +27,8 @@ module.exports = function(RED) {
 
 		case "play":
 		case "tick":
-		    var payload = [node.synth_id];
+		    var payload = [node.synth_ids[node.next_voice]];
+		    
 		    if(msg.midi == -1){
 			payload.push("gate", 0);
 		    }
@@ -45,6 +46,11 @@ module.exports = function(RED) {
 		    }
 		    
 		    node.send(playmsg);
+
+		    node.next_voice++;
+		    if(node.next_voice >= node.voices){
+			node.next_voice = 0;
+		    }
 		    break;
 		    
 		case "reset":
@@ -53,11 +59,13 @@ module.exports = function(RED) {
 		    break;
 
 		case "stop":
-		    var stopMsg = {topic: "/n_set",
-				   payload:
-				   [node.synth_id, "gate" , 0]
-				  }
-		    node.send(stopMsg);
+		    for(var voice = 0; voice < node.voices; voice++){
+			var stopMsg = {topic: "/n_set",
+				       payload:
+				       [node.synth_ids[voice], "gate" , 0]
+				      }
+			node.send(stopMsg);
+		    }
 		    break;
 		    
 		case "start":
@@ -79,46 +87,54 @@ module.exports = function(RED) {
 
 	function setSynthVol(){
 	    var amp = node.vol/100.0; // Use a logarithmic scale?
-	    
-	    var volmsg = {
-		"topic": "/n_set",
-		"payload": [node.synth_id, "amp", amp]
+	    for(var voice = 0; voice<node.voices; voice++){
+		var volmsg = {
+		    "topic": "/n_set",
+		    "payload": [node.synth_ids[voice], "amp", amp]
+		}
+		node.send(volmsg);
 	    }
-	    node.send(volmsg);
 	}
 	
 
 	function createSynth(){
 	    var global = node.context().global;
-	    var id = Number(global.get("synth_next_sc_node"));
-	    if(isNaN(id)){
-		id = 100000; // high to avoid nodes from sclang
+	    for(var voice = 0; voice < node.voices; voice++){
+		var id = Number(global.get("synth_next_sc_node"));
+		if(isNaN(id)){
+		    id = 100000; // high to avoid nodes from sclang
+		}
+		global.set("synth_next_sc_node", id + 1);
+		node.synth_ids[voice] = id;
+		var createMsg = {
+		    topic: "/s_new",
+		    payload: [node.name, node.synth_ids[voice], 1, 1]
+		}
+		node.send(createMsg);
 	    }
-	    global.set("synth_next_sc_node", id + 1);
-	    node.synth_id = id;
-	    var createMsg = {
-		topic: "/s_new",
-		payload: [node.name, node.synth_id, 1, 1]
-	    }
-	    node.send(createMsg);
 	    setSynthVol();
 	}
 	
 	function freeSynth(){
-	    if(node.synth_id){
-		var freeMsg = {
-		    topic: "/n_free",
-		    payload: node.synth_id
+	    for(var voice = 0; voice<node.voices; voice++){
+		if(node.synth_ids[voice]){
+		    var freeMsg = {
+			topic: "/n_free",
+			payload: node.synth_ids[voice]
+		    }
+		    node.send(freeMsg);
+		    node.synth_ids[voice] = null;
 		}
-		node.send(freeMsg);
-		node.synth_id = null;
 	    }
 	}
 	
 	function reset(){
 	    node.name = config.name || "piano";
 	    node.vol = Number(config.start_vol) || 70;
-
+	    node.voices = Number(config.voices) || 4;
+	    node.next_voice = 0;
+	    node.synth_ids = Array(node.voices);
+	    
 	    freeSynth();
 	    createSynth();
 	}
