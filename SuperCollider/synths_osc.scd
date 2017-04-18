@@ -247,3 +247,21 @@ Out.ar(0, out); //Out.ar(bus, out);
 }).store;
 )
 
+(
+SynthDef("recordSample", {
+	| buffer, recLevel=1, preLevel=0 |
+    var in;
+    in = SoundIn.ar(0);
+    RecordBuf.ar(in, buffer,
+		recLevel: recLevel,
+		preLevel: preLevel,
+		loop:0);
+}).store
+)
+
+(
+SynthDef("playSample", {
+	|buffer, out = 0, rate = 1, startPos = 0|
+    Out.ar(out, PlayBuf.ar(1, buffer, rate, startPos: startPos) ! 2)
+}).store;
+)

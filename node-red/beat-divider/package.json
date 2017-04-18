@@ -1,26 +1,27 @@
 {
-  "name": "beat-divider",
-  "version": "0.0.1",
-  "description": "Beats, bars etc",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "node-red"
-  ],
-  "node-red": {
-    "nodes": {
-      "beat": "beat.js",
-      "divider": "divider.js",
-      "sequencer": "sequencer.js",
-      "synth": "synth.js",
-      "tracker": "tracker.js"
+    "name": "beat-divider",
+    "version": "0.0.1",
+    "description": "Beats, bars etc",
+    "main": "index.js",
+    "scripts": {
+	"test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+	"node-red"
+    ],
+    "node-red": {
+	"nodes": {
+	    "beat": "beat.js",
+	    "divider": "divider.js",
+	    "sampler": "sampler.js",
+	    "sequencer": "sequencer.js",
+	    "synth": "synth.js",
+	    "tracker": "tracker.js"
+	}
+    },
+    "author": "s.p.bradley@durham.ac.uk",
+    "license": "ISC",
+    "dependencies": {
+	"underscore": "^1.8.3"
     }
-  },
-  "author": "s.p.bradley@durham.ac.uk",
-  "license": "ISC",
-  "dependencies": {
-    "underscore": "^1.8.3"
-  }
 }
