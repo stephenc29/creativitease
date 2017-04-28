@@ -5,7 +5,7 @@ module.exports = function(RED) {
 	
         RED.nodes.createNode(this,config);
         var node = this;
-
+	
 	reset();
 	
         this.on('input', function(msg) {
@@ -19,37 +19,21 @@ module.exports = function(RED) {
 		node.vol = Math.min(100, Math.max(0, node.vol));
 
 		setSynthVol();
-
+		
 		break;
 		
 	    default:
 		switch(msg.payload){
-
+		    
 		case "play":
 		case "tick":
-		    var payload = [node.synth_ids[node.next_voice]];
-		    
-		    if(msg.midi == -1){
-			payload.push("gate", 0);
+		    if(Array.isArray(msg.midi)){
+			msg.midi.forEach(function(midiVal){
+			    sendNote(midiVal);
+			});
 		    }
 		    else{
-		    payload.push("gate", 1);
-			payload.push("t_trig", 1);
-			if(msg.midi){
-			    payload.push("midi", msg.midi);
-			}
-		    }
-		    
-		    var playmsg = {
-			topic: "/n_set",
-			payload: payload
-		    }
-		    
-		    node.send(playmsg);
-
-		    node.next_voice++;
-		    if(node.next_voice >= node.voices){
-			node.next_voice = 0;
+			sendNote(msg.midi);
 		    }
 		    break;
 		    
@@ -57,7 +41,7 @@ module.exports = function(RED) {
 		    reset();
 		    // just this once the reset message is not propagated
 		    break;
-
+		    
 		case "stop":
 		    for(var voice = 0; voice < node.voices; voice++){
 			var stopMsg = {topic: "/n_set",
@@ -80,11 +64,38 @@ module.exports = function(RED) {
 		
 	    }
         });
-
+	
 	this.on('close', function(){
 	    freeSynth();
 	});
-
+	
+	function sendNote(midi){
+	    var payload = [node.synth_ids[node.next_voice]];
+	    
+	    if(midi == -1){
+		payload.push("gate", 0);
+	    }
+	    else{
+		payload.push("gate", 1);
+		payload.push("t_trig", 1);
+		if(midi){
+		    payload.push("midi", midi);
+		}
+	    }
+	    
+	    var playmsg = {
+		topic: "/n_set",
+		payload: payload
+	    }
+	    
+	    node.send(playmsg);
+	    
+	    node.next_voice++;
+	    if(node.next_voice >= node.voices){
+		node.next_voice = 0;
+	    }
+	}
+    
 	function setSynthVol(){
 	    var amp = node.vol/100.0; // Use a logarithmic scale?
 	    for(var voice = 0; voice<node.voices; voice++){
@@ -96,7 +107,6 @@ module.exports = function(RED) {
 	    }
 	}
 	
-
 	function createSynth(){
 	    var global = node.context().global;
 	    for(var voice = 0; voice < node.voices; voice++){

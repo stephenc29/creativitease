@@ -122,6 +122,9 @@ module.exports = function(RED) {
 
 	// use default scale for now    
 	function note2midi(note){
+	    if(Array.isArray(note)){
+		return _.map(note, note2midi);
+	    }
 	    if(note === null){
 		return -1;
 	    }
