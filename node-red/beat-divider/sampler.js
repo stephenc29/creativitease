@@ -64,7 +64,6 @@ module.exports = function(RED) {
 		var start = msg.start || [];
 		if(node.count <= 0){
 		    if(start.includes(node.start)){
-			node.warn("starting " + node.state);
 			node.count = node.length;
 			setState(node.state); // to display status
 			createSynth(node.state);
@@ -111,7 +110,7 @@ module.exports = function(RED) {
 	    var seconds = 20; //assumed max length for now
 	    var createMsg = {
 		topic: "/b_alloc",
-		payload: [node.bufnum, fps * seconds]
+		payload: [node.bufnum, fps * seconds * 2, 2]
 	    }
 	    node.send(createMsg);
 	}

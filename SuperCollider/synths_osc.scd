@@ -249,9 +249,9 @@ Out.ar(0, out); //Out.ar(bus, out);
 
 (
 SynthDef("recordSample", {
-	| buffer, recLevel=1, preLevel=0 |
+	| buffer, recLevel=1, preLevel=1 |
     var in;
-    in = SoundIn.ar(0);
+	in = SoundIn.ar([0, 1]);
     RecordBuf.ar(in, buffer,
 		recLevel: recLevel,
 		preLevel: preLevel,
@@ -262,6 +262,7 @@ SynthDef("recordSample", {
 (
 SynthDef("playSample", {
 	|buffer, out = 0, rate = 1, startPos = 0|
-    Out.ar(out, PlayBuf.ar(1, buffer, rate, startPos: startPos) ! 2)
+    Out.ar(out, PlayBuf.ar(2, buffer, rate, startPos: startPos) ! 2)
 }).store;
 )
+
