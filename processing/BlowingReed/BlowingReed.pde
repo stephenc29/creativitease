@@ -11,8 +11,8 @@ void setup() {
   size(1200, 900);
   background(0);
   for (int i = 0; i<numReeds; i++) {
-    reedBed.add( new Reed(maxHeight+ random(width - 2*maxHeight),
-    maxHeight +random(height - 2*maxHeight), 
+    reedBed.add( new Reed(0.5*maxHeight+ random(width - 1.5*maxHeight),
+    maxHeight +random(height - 1.5*maxHeight), 
     50 + random(maxHeight -50), 
     1+random(maxWidth-1),
     color(random(255))
