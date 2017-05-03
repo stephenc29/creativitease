@@ -141,7 +141,7 @@ module.exports = function(RED) {
 	function reset(){
 	    node.name = config.name || "piano";
 	    node.vol = Number(config.start_vol) || 70;
-	    node.voices = Number(config.voices) || 4;
+	    node.voices = Number(config.voices) || 1;
 	    node.next_voice = 0;
 	    node.synth_ids = Array(node.voices);
 	    

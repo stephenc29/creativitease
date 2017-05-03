@@ -41,9 +41,10 @@ s.reboot; "
 
 * Start node-red
 * Start point browser to http://127.0.0.1:1880
-* Output is probably mono so make sure everything is plugged in to RH channel
-*
+* add udp output to http://127.0.0.1 port 57110 by default for scsynth
 
 ### Debug
 
-* s.dumpOSC(1);
+* use debug node in node-red
+* s.dumpOSC(1); in sclang to watch OSC events
+* If SC is started after node-red you might get messages in SC like "FAILURE IN SERVER /n_set Node 100039 not found". Fix by redepolying all nodes (Pull down in Deploy menu to "Full" Deploys everything in the workspace)

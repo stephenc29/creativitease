@@ -1,6 +1,9 @@
 module.exports = function(RED) {
     "use strict";
-    
+
+    var mathjs = require("mathjs");
+    var _ = require("underscore");
+
     function BeatNode(config) {
 	
         RED.nodes.createNode(this,config);
@@ -27,6 +30,7 @@ module.exports = function(RED) {
 
 		case "stop":
 		    clearTimeout(node.tick);
+		    node.thisBeatStart = null;
 		    node.started = false;
 		    node.send(msg);
 		    break;
@@ -49,7 +53,12 @@ module.exports = function(RED) {
 	function reset(){
 	    clearTimeout(node.tick);
 	    node.output = config.output;
+	    node.subBeats = config.subBeats || [];
+
+	    setFractionalBeats(node.subBeats);
+	    
 	    setBPM(config.bpm);
+	    
 	    node.started = false;
 	    node.beatNum = 0;
 	}
@@ -58,6 +67,16 @@ module.exports = function(RED) {
 	    if(!isNaN(bpm)){
 		if(bpm>10 && bpm <1000){
 		    node.interval = 60000.0/bpm;
+		    console.log("Setting fractionalintervals with interval " + node.interval);
+		    console.log("fractionalBeats:");
+		    console.log(node.fractionalBeats);
+		    
+		    node.fractionalIntervals = _.map(
+			node.fractionalBeats,
+		    	function(event){ return {names: event.names, pos: event.pos*node.interval}});
+		    console.log("fractionalIntervals:");
+		    console.log(node.fractionalIntervals);
+
 		}
 		else{
 		    node.warn("BPM not in range 10-1000");
@@ -67,20 +86,129 @@ module.exports = function(RED) {
 		node.warn("BPM is not a number: " + bpm);
 	    }
 	}
-	
-	function beat(){
-	    node.beatNum = node.beatNum || 0;
-	    node.beatNum++;
-	    var count = new Object();
-	    count[node.output] = node.beatNum;
-	    var msg = {payload: "tick",
-		       start: [node.output],
-		       };
-	    msg[node.output] = node.beatNum;
-	    node.send(msg);
-	    node.tick = setTimeout(beat, node.interval);
+
+	function setFractionalBeats(subBeats){
+	    if(subBeats.length > 0){
+
+		// find the LCM of the subBeat counts
+		var lcm = 1;
+		var subBeatList = [];
+		for(var i = 0; i<subBeats.length; i++){
+		    var subBeat = subBeats[i];
+		    var count = Number(subBeat.count);
+		    if(count > 0 && Number.isInteger(count)){
+			lcm = mathjs.lcm(lcm, count);
+			subBeatList.push({name:subBeat.name, count: count});
+		    }
+		    else{
+			node.warn("subBeat count for " + subBeat.name + " needs to be a positive integer: " + count) ;
+			return;
+		    }
+		}
+
+		// generate a list of lists of all the subBeats with their position in the list
+		var allEvents = [{name:node.output, pos:0}];
+
+		for(var i = 0; i<subBeatList.length; i++){
+		    var subBeat = subBeatList[i];
+		    for(var j=0; j<subBeat.count; j++){
+			allEvents.push({name:subBeat.name, pos:j*lcm/subBeat.count});
+		    }
+		}
+
+		allEvents.sort(function(a,b){ return a.pos-b.pos});
+
+		console.log("allEvents");
+		console.log(allEvents);
+		var combinedEvents = _.reduce(allEvents, function(sofar, event){
+
+		    if(sofar.length == 0){
+			return [{names:[event.name],pos:event.pos}];
+		    }
+		    var lastSofar = _.last(sofar);
+		    var lastPos = lastSofar.pos;
+		    var lastNames = lastSofar.names;
+		    var eventPos = event.pos;
+		    if(lastPos == eventPos){
+			lastNames.push(event.name);
+			sofar.pop();
+			sofar.push({names:lastNames, pos:lastPos});
+		    }
+		    else{
+			sofar.push({names:[event.name], pos:eventPos});
+		    }
+
+		    return sofar;
+		}, []);
+
+		node.fractionalBeats = _.map(combinedEvents, function (event){ event.pos /= lcm; return event;});
+	    }
+	    else{
+		node.fractionalBeats = [{names:[node.output], pos:0}];
+	    }
+	    node.allSubBeatNames = node.fractionalBeats[0].names;
+	    node.beatCounter = new Object();
+	    node.subBeatNum = 0;
+	    node.thisBeatStart = null;
 	}
 
+	function beat(){
+	    node.beatCounter = node.beatCounter || new Object();
+	    node.subBeatNum = node.subBeatNum || 0;
+	    node.thisBeatStart = node.thisBeatStart || Date.now();
+	    
+	    var subBeat = node.fractionalIntervals[node.subBeatNum];
+	    console.log("subBeat");
+	    console.log(subBeat);
+
+	    console.log("node.fractionalIntervals");
+	    console.log(node.fractionalIntervals);
+
+	    
+
+	    for(var i = 0; i<subBeat.names.length; i++){
+		var subName = subBeat.names[i];
+		node.beatCounter[subName] = node.beatCounter[subName] || 0;
+		node.beatCounter[subName]++;
+		console.log("Incrementing beatCounter for " + subName);
+	    }
+
+	    var msg = {payload: "tick",
+		       start: subBeat.names
+		       };
+
+	    for(var i = 0; i<node.allSubBeatNames.length; i++){
+		var subName = node.allSubBeatNames[i];
+		msg[subName] = node.beatCounter[subName];
+	    }
+	    node.send(msg);
+
+	    console.log("Sent msg");
+	    node.subBeatNum++;
+	    if(node.subBeatNum >= node.fractionalIntervals.length){
+		node.subBeatNum = 0;
+		var firstSubBeat = node.fractionalIntervals[0];
+		for(var i = 0; i<firstSubBeat.names.length; i++){
+		    var subName = firstSubBeat.names[i];
+		    if(subName != node.output){
+			node.beatCounter[subName] = 0;
+		    }
+		}
+		node.thisBeatStart += node.interval;
+	    }
+
+	    console.log("thisBeatStart");
+	    console.log(node.thisBeatStart);
+	    var nextSubBeat = node.fractionalIntervals[node.subBeatNum];
+	    var nextSubBeatStart = node.thisBeatStart + nextSubBeat.pos;
+	    console.log("nextSubBeatStart");
+	    console.log(nextSubBeatStart);
+	    var interval = nextSubBeatStart - Date.now();
+	    console.log("interval");
+	    console.log(interval);
+	    node.tick = setTimeout(beat, interval);
+
+	}
     }
     
 	
