@@ -67,16 +67,10 @@ module.exports = function(RED) {
 	    if(!isNaN(bpm)){
 		if(bpm>10 && bpm <1000){
 		    node.interval = 60000.0/bpm;
-		    console.log("Setting fractionalintervals with interval " + node.interval);
-		    console.log("fractionalBeats:");
-		    console.log(node.fractionalBeats);
 		    
 		    node.fractionalIntervals = _.map(
 			node.fractionalBeats,
 		    	function(event){ return {names: event.names, pos: event.pos*node.interval}});
-		    console.log("fractionalIntervals:");
-		    console.log(node.fractionalIntervals);
-
 		}
 		else{
 		    node.warn("BPM not in range 10-1000");
@@ -118,8 +112,6 @@ module.exports = function(RED) {
 
 		allEvents.sort(function(a,b){ return a.pos-b.pos});
 
-		console.log("allEvents");
-		console.log(allEvents);
 		var combinedEvents = _.reduce(allEvents, function(sofar, event){
 
 		    if(sofar.length == 0){
@@ -158,32 +150,25 @@ module.exports = function(RED) {
 	    node.thisBeatStart = node.thisBeatStart || Date.now();
 	    
 	    var subBeat = node.fractionalIntervals[node.subBeatNum];
-	    console.log("subBeat");
-	    console.log(subBeat);
-
-	    console.log("node.fractionalIntervals");
-	    console.log(node.fractionalIntervals);
-
-	    
 
 	    for(var i = 0; i<subBeat.names.length; i++){
 		var subName = subBeat.names[i];
 		node.beatCounter[subName] = node.beatCounter[subName] || 0;
 		node.beatCounter[subName]++;
-		console.log("Incrementing beatCounter for " + subName);
 	    }
 
 	    var msg = {payload: "tick",
 		       start: subBeat.names
 		       };
 
-	    for(var i = 0; i<node.allSubBeatNames.length; i++){
-		var subName = node.allSubBeatNames[i];
+
+	    for(var j = 0; j<node.allSubBeatNames.length; j++){
+		var subName = node.allSubBeatNames[j];
 		msg[subName] = node.beatCounter[subName];
 	    }
+
 	    node.send(msg);
 
-	    console.log("Sent msg");
 	    node.subBeatNum++;
 	    if(node.subBeatNum >= node.fractionalIntervals.length){
 		node.subBeatNum = 0;
@@ -197,17 +182,10 @@ module.exports = function(RED) {
 		node.thisBeatStart += node.interval;
 	    }
 
-	    console.log("thisBeatStart");
-	    console.log(node.thisBeatStart);
 	    var nextSubBeat = node.fractionalIntervals[node.subBeatNum];
 	    var nextSubBeatStart = node.thisBeatStart + nextSubBeat.pos;
-	    console.log("nextSubBeatStart");
-	    console.log(nextSubBeatStart);
 	    var interval = nextSubBeatStart - Date.now();
-	    console.log("interval");
-	    console.log(interval);
 	    node.tick = setTimeout(beat, interval);
-
 	}
     }
     
