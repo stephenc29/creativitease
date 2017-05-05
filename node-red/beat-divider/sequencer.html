@@ -12,7 +12,9 @@
   rhythmrand: {value: false, required: false},
   octave: {value: 0},
   loop: {value: true, required: true},
-  start: {value: "bar", required: true}
+  start: {value: "bar", required: true},
+  root: {value:"", required: false},
+  scale: {value:"default", required: false}
   },
   inputs:1,
   outputs:1,
@@ -59,6 +61,24 @@
     <div class="form-row">
         <label for="node-input-octave"><i class="icon-tag"></i> Octave</label>
         <input type="text" id="node-input-octave" placeholder="e.g. -1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-root"><i class="icon-tag"></i> Root note of scale (if different from global) </label>
+        <input type="text" id="node-input-root" placeholder="e.g. C4">
+    </div>
+    <div class="form-row">
+        <label for="node-input-scale"><i class="icon-tag"></i> Scale type </label>
+        <select id="node-input-scale">
+	  <option>default</option>
+	  <option>minor</option>
+	  <option>major</option>
+	  <option>dorian</option>
+	  <option>mixolydian</option>
+	  <option>major pentatonic</option>
+	  <option>minor pentatonic</option>
+	  <option>blues</option>
+	  <option>chromatic</option>
+	</select>
     </div>
 </script>
 
