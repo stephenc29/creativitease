@@ -54,7 +54,8 @@ module.exports = function(RED) {
 	    clearTimeout(node.tick);
 	    node.output = config.output;
 	    node.subBeats = config.subBeats || [];
-
+	    node.latency = Number(config.latency) || 0;
+	    
 	    setFractionalBeats(node.subBeats);
 	    
 	    setBPM(config.bpm);
@@ -167,6 +168,10 @@ module.exports = function(RED) {
 		msg[subName] = node.beatCounter[subName];
 	    }
 
+	    if(node.latency){
+		msg.timeTag = node.thisBeatStart + subBeat.pos + node.latency;
+	    }
+	    
 	    node.send(msg);
 
 	    node.subBeatNum++;

@@ -1,5 +1,7 @@
 module.exports = function(RED) {
     "use strict";
+
+    var osc = require("osc"); // required by node-red-contrib-osc
     
     function SynthNode(config) {
 	
@@ -29,11 +31,11 @@ module.exports = function(RED) {
 		case "tick":
 		    if(Array.isArray(msg.midi)){
 			msg.midi.forEach(function(midiVal){
-			    sendNote(midiVal);
+			    sendNote(midiVal, msg);
 			});
 		    }
 		    else{
-			sendNote(msg.midi);
+			sendNote(msg.midi, msg);
 		    }
 		    break;
 		    
@@ -69,7 +71,7 @@ module.exports = function(RED) {
 	    freeSynth();
 	});
 	
-	function sendNote(midi){
+	function sendNote(midi, msg){
 	    var payload = [node.synth_ids[node.next_voice]];
 	    
 	    if(midi == -1){
@@ -82,12 +84,27 @@ module.exports = function(RED) {
 		    payload.push("midi", midi);
 		}
 	    }
-	    
-	    var playmsg = {
-		topic: "/n_set",
-		payload: payload
+
+	    if(msg.timeTag ){
+		var playmsg = {
+		    payload:{
+			timeTag: msg.timeTag,
+			packets: [
+			    {
+				address: "/n_set",
+				args: payload
+			    }
+			]
+		    }
+		};
 	    }
-	    
+	    else{
+		var playmsg = {
+		    topic: "/n_set",
+		    payload:  payload
+		}
+	    }
+
 	    node.send(playmsg);
 	    
 	    node.next_voice++;
