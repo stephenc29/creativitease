@@ -2,9 +2,19 @@
 
 ## Installation
 
-* Install node-red
-* npm install node-red-contrib-osc
-* install creativitease
+### node-red
+
+* Install node and npm: on Rpi Jessie these are already installed but old: use `update-nodejs-and-nodered`
+* Follow instructions here <https://nodered.org/docs/getting-started/installation>
+* Install node-red `sudo npm install -g --unsafe-perm node-red`
+* npm install node-red-contrib-osc via node-red palette manager
+* patch node-red-contrib osc.js to allow for absolute timestamps in OSC messages
+
+###
+* install creativitease: git clone
+* follow instructions for local installation of module at <https://nodered.org/docs/creating-nodes/packaging>
+1. in the directory containing the node’s package.json file, run: `sudo npm link`.
+2. in your node-red user directory, typically ~/.node-red run: `npm link <name of node module>` i.e. beat-divider.
 
 ### Supercollider
 
@@ -16,6 +26,19 @@
 * Install processing from https://processing.org/download/
 * Start processing and goto Sketch > Import Library > Add Library ...
 * Select oscP5 from the list and click on Install (then close tne contribution manager window)
+
+### RPi
+
+* Instructions for IQAudio http://www.iqaudio.com/downloads/IQaudIO.pdf
+* In particular edit `sudo nano /boot/config.txt` comment out
+```
+#dtparam=audio=on
+```
+and add
+```
+dtoverlay=iqaudio-dacplus
+dtoverlay=i2s-mmap
+```
 
 ## Start up
 
