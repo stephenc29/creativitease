@@ -266,3 +266,4 @@ SynthDef("playSample", {
 }).store;
 )
 
+s.dumpOSC(1);
