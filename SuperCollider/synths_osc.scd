@@ -21,7 +21,7 @@ SynthDef("bell",
 			];
 		env = Env([0,1,0], [0.002,0.02]);
 		panned = Pan2.ar(
-			Klank.ar(z, BrownNoise.ar(mul: amp*0.075)*EnvGen.ar(env, 1, doneAction:2)), pan
+			Klank.ar(z, BrownNoise.ar(mul: amp*0.25)*EnvGen.ar(env, 1, doneAction:0)), pan
 		);
 		DetectSilence.ar(panned, doneAction:2);
 		Out.ar(out, panned);
@@ -104,7 +104,7 @@ SynthDef("piano",
 		var delayTime, detune, strike, hammerEnv, hammer;
 		var threeStrings, panned, silenced;
 		var freq = midicps(midi);
-		strike = Impulse.ar(0, 0, amp*0.03);
+		strike = Impulse.ar(0, 0, amp*0.9);
 
 		hammerEnv = Decay2.ar(strike, 0.008, 0.04); // excitation envelope
 		threeStrings = // array of 3 strings per note
@@ -220,7 +220,7 @@ SynthDef("moog", {
 		)
 	});
 
-	snd = (snd + (chorusfx * chorus)) * amp * 5.0;
+	snd = (snd + (chorusfx * chorus)) * amp * 12.0;
 
 	Out.ar(out, Pan2.ar(snd, pan));
 
@@ -244,7 +244,7 @@ out = PMOsc.ar(freq, mod*freq,
 
 out = Pan2.ar(out, pan);
 
-out = out * EnvGen.kr(env, timeScale: 1.3*art,
+out = out * amp*1.5 * EnvGen.kr(env,  timeScale: 1.3*art,
 	levelScale: Rand(0.1, 0.5), doneAction:2);
 Out.ar(0, out); //Out.ar(bus, out);
 
