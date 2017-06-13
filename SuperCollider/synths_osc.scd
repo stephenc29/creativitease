@@ -141,7 +141,7 @@ SynthDef("blip", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, amp
 }).store;
 )
 
-
+Synth("blip", ["midi", 84])
 
 (
 SynthDef("marimba", {|midi = 80, amp = 0.5|
@@ -267,6 +267,30 @@ SynthDef("recordSample", {
 SynthDef("playSample", {
 	|buffer, out = 0, rate = 1, startPos = 0|
     Out.ar(out, PlayBuf.ar(2, buffer, rate, startPos: startPos) ! 2)
+}).store;
+)
+
+
+// soundFX
+(
+SynthDef("reverb", { |outBus = 0, inBus|
+	var input;
+	input = In.ar(inBus, 2);
+
+
+	Out.ar(outBus, FreeVerb.ar(input));
+	}).store;
+)
+
+(
+SynthDef("delay", {| out = 0, inBus, time = 0.5|
+	var input, delayed;
+	input = In.ar(inBus, 2);
+
+	delayed = CombN.ar(input, time, time, time*10);
+	Out.ar(out, input);
+	Out.ar(out, delayed);
+
 }).store;
 )
 
