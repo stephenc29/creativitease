@@ -141,7 +141,6 @@ SynthDef("blip", {arg out = 0, midi = 20, numharm = 10, att = 0.01, rel = 1, amp
 }).store;
 )
 
-Synth("blip", ["midi", 84])
 
 (
 SynthDef("marimba", {|midi = 80, amp = 0.5|
@@ -251,6 +250,22 @@ Out.ar(0, out); //Out.ar(bus, out);
 }).store;
 )
 
+// resonance designed to be in range 0-100
+(
+SynthDef("ghost",
+	{|amp = 0.5, out=0, midi=40, resonance=70, lag = 1.0, gate =0|
+
+		var noise=WhiteNoise.ar(mul:amp);
+		var freq = Lag.kr(midicps(midi), lag);
+		var env = EnvGen.ar(
+		envelope: Env.adsr(2, 0.3, 0.8, 1, 1.2),
+		gate: gate,
+		doneAction: 0);
+		Out.ar(out, env *
+			RLPF.ar(noise, freq, 2.pow(-1.0*resonance/10.0))!2);
+}).store
+)
+
 (
 SynthDef("recordSample", {
 	| buffer, recLevel=1, preLevel=1 |
@@ -293,5 +308,7 @@ SynthDef("delay", {| out = 0, inBus, time = 0.5|
 
 }).store;
 )
+
+
 
 s.dumpOSC(1);
